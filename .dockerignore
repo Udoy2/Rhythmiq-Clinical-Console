@@ -1,0 +1,9 @@
+.git
+**/__pycache__
+**/.pytest_cache
+**/node_modules
+frontend/dist
+frontend/dist-mock
+data/physionet
+**/.env
+*.ipynb

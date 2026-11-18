@@ -1,0 +1,58 @@
+# Production stack (deployed with Dokploy): PostgreSQL + backend + nginx console.
+# The reverse proxy routes the public domain to the `cardiosense-web` service on port 80.
+# Required variables (set them in the deployment environment, never in git):
+#   POSTGRES_PASSWORD, CARDIOSENSE_JWT_SECRET, CARDIOSENSE_DEVICE_KEY_PEPPER, CARDIOSENSE_SEED_PASSWORD
+# Optional: PUBLIC_ORIGIN (default https://cardiosense.mrudoy.me)
+services:
+  cardiosense-db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cardiosense
+      POSTGRES_DB: cardiosense
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U cardiosense -d cardiosense"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  cardiosense-backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      cardiosense-db:
+        condition: service_healthy
+    environment:
+      CARDIOSENSE_ENV: prod
+      CARDIOSENSE_DATABASE_URL: postgresql+asyncpg://cardiosense:${POSTGRES_PASSWORD}@cardiosense-db:5432/cardiosense
+      CARDIOSENSE_JWT_SECRET: ${CARDIOSENSE_JWT_SECRET:?set CARDIOSENSE_JWT_SECRET}
+      CARDIOSENSE_DEVICE_KEY_PEPPER: ${CARDIOSENSE_DEVICE_KEY_PEPPER:?set CARDIOSENSE_DEVICE_KEY_PEPPER}
+      CARDIOSENSE_SEED: "1"
+      CARDIOSENSE_SEED_PASSWORD: ${CARDIOSENSE_SEED_PASSWORD:?set CARDIOSENSE_SEED_PASSWORD}
+      CARDIOSENSE_SELF_WS_URL: ws://localhost:8000
+      CARDIOSENSE_CORS_ORIGINS: '["${PUBLIC_ORIGIN:-https://cardiosense.mrudoy.me}"]'
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/v1/health', timeout=4).status == 200 else 1)"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+
+  cardiosense-web:
+    build:
+      context: ./frontend
+    restart: unless-stopped
+    depends_on:
+      - cardiosense-backend
+    expose:
+      - "80"
+
+volumes:
+  pgdata:
