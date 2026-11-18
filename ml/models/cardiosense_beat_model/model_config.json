@@ -1,0 +1,226 @@
+{
+  "model_version": "cardiosense-beat-resnet-tpl-local-standin-20261118",
+  "stand_in": true,
+  "stand_in_note": "LOCAL STAND-IN, not the Kaggle model. Trained on CPU with a reduced budget (MIT-BIH DS1+DS2 (44 non-paced records, no INCART), 1 seed(s), 6 epochs with SWA over the last 2; the notebook uses 3 seeds x 15 epochs on GPU and adds INCART). It is NOT the model whose metrics are quoted in the BRD (section 8.3); the numbers under 'evaluation' were measured on this machine for this stand-in. Replace beat_model_ts.pt + model_config.json with the Kaggle export to deploy the real one.",
+  "architecture": "ResNet1D, 2-channel input (beat, beat minus patient template) + 7 RR features; 1-seed ensemble, SWA weights, softmax-averaged",
+  "files": {
+    "torchscript": "beat_model_ts.pt",
+    "state_dict": "beat_model.pth",
+    "local_metrics": "metrics_local.json",
+    "local_verification": "verify_local.json"
+  },
+  "classes": [
+    "N",
+    "S",
+    "V",
+    "F"
+  ],
+  "fs": 250,
+  "pre": 90,
+  "post": 160,
+  "margin": 8,
+  "window_len": 250,
+  "bandpass_hz": [
+    0.5,
+    40.0
+  ],
+  "filter_order": 3,
+  "template_prev_beats": 20,
+  "rr_features": [
+    "pre_rr",
+    "post_rr",
+    "local10_rr",
+    "pre/local10",
+    "post/local10",
+    "pre/post",
+    "pre/local100"
+  ],
+  "rr_transform": "log(clip(x, 0.01, 10)), RR in seconds, causal local means",
+  "inputs": {
+    "beat": "(B, 2, 250) float32",
+    "rr": "(B, 7) float32"
+  },
+  "output": "(B, 4) class probabilities",
+  "unknown_threshold": 0.5,
+  "class_bias": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "latency_note": "post_rr needs the next beat, so each label is available ~1 beat after the R-peak",
+  "training": {
+    "deployment_data": "MIT-BIH 44 non-paced records (DS1 + DS2); INCART not included",
+    "augmentation": "R-peak jitter +-32 ms, NSTDB em/ma/bw noise at 6-30 dB SNR",
+    "cfg": {
+      "epochs": 6,
+      "swa_epochs": 2,
+      "batch": 512,
+      "lr": 0.001,
+      "wd": 0.001,
+      "cw_power": 0.5,
+      "label_smoothing": 0.05
+    },
+    "seeds": [
+      42
+    ],
+    "device": "cpu",
+    "wall_time_s": 2361.1338300704956,
+    "torch": "2.15.0+cpu",
+    "script": "ml/train_local.py"
+  },
+  "evaluation_note": "Reported metrics come from a separate local model trained on DS1 only (patient-wise, tested on DS2); the shipped stand-in is retrained on DS1+DS2 and has no held-out test of its own. All numbers were measured locally, not copied from the BRD.",
+  "evaluation": {
+    "source": "LOCAL STAND-IN measurements (ml/train_local.py on this machine) - not the BRD / Kaggle numbers",
+    "protocol": "patient-wise: trained on MIT-BIH DS1 (22 records, 50981 beats), tested on DS2 (22 unseen records, 49679 beats), cardiologist R-peaks, AAMI N/S/V/F, argmax labels; 1 seed(s) [42], 8 epochs, SWA over last 3",
+    "ds2_local_standin": {
+      "acc": 0.9146923247247328,
+      "macroF1": 0.5515742776048518,
+      "N_Se": 0.9509427137496044,
+      "N_+P": 0.9664330844342331,
+      "N_F1": 0.9586253261773721,
+      "S_Se": 0.2672836145890038,
+      "S_+P": 0.25653082549634276,
+      "S_F1": 0.2617968541722207,
+      "V_Se": 0.8695652173913043,
+      "V_+P": 0.7988587731811697,
+      "V_F1": 0.8327137546468402,
+      "F_Se": 0.22164948453608246,
+      "F_+P": 0.11700680272108843,
+      "F_F1": 0.15316117542297417
+    },
+    "ds2_per_seed": [
+      {
+        "seed": 42,
+        "acc": 0.9146923247247328,
+        "macroF1": 0.5515742776048518,
+        "N_Se": 0.9509427137496044,
+        "N_+P": 0.9664330844342331,
+        "N_F1": 0.9586253261773721,
+        "S_Se": 0.2672836145890038,
+        "S_+P": 0.25653082549634276,
+        "S_F1": 0.2617968541722207,
+        "V_Se": 0.8695652173913043,
+        "V_+P": 0.7988587731811697,
+        "V_F1": 0.8327137546468402,
+        "F_Se": 0.22164948453608246,
+        "F_+P": 0.11700680272108843,
+        "F_F1": 0.15316117542297417
+      }
+    ],
+    "ds2_confusion_matrix": [
+      [
+        42064,
+        1319,
+        444,
+        407
+      ],
+      [
+        1098,
+        491,
+        241,
+        7
+      ],
+      [
+        83,
+        102,
+        2800,
+        235
+      ],
+      [
+        280,
+        2,
+        20,
+        86
+      ]
+    ],
+    "ds2_S_Se_without_record_232": 0.5846153846153846,
+    "unknown_threshold_table_ds2": [
+      {
+        "threshold": 0.4,
+        "coverage": 0.9832927393868637,
+        "acc_kept": 0.9235194169788532,
+        "acc_flagged_unknown": 0.39518072289156625
+      },
+      {
+        "threshold": 0.5,
+        "coverage": 0.9443024215463274,
+        "acc_kept": 0.939994031377899,
+        "acc_flagged_unknown": 0.4857246114925913
+      },
+      {
+        "threshold": 0.6,
+        "coverage": 0.8915235813925401,
+        "acc_kept": 0.959561977873109,
+        "acc_flagged_unknown": 0.5459268881053999
+      },
+      {
+        "threshold": 0.7,
+        "coverage": 0.8010225648664425,
+        "acc_kept": 0.9720812182741116,
+        "acc_flagged_unknown": 0.6836621143146181
+      },
+      {
+        "threshold": 0.8,
+        "coverage": 0.10873809859296685,
+        "acc_kept": 0.9091077378748612,
+        "acc_flagged_unknown": 0.9153736703028661
+      }
+    ],
+    "end_to_end": {
+      "condition": "DS2, own R-peak detector, 360 Hz input, labels incl. Unknown threshold (an Unknown beat counts as a miss)",
+      "det_Se": 0.9791599613775346,
+      "det_+P": 0.9991789145250021,
+      "acc": 0.8825173101025251,
+      "macroF1": 0.5441828098981943,
+      "N_Se": 0.9201332261398875,
+      "S_Se": 0.1773207337409672,
+      "V_Se": 0.8484132343011479,
+      "F_Se": 0.168,
+      "N_+P": 0.9742679248954178,
+      "S_+P": 0.22370266479663395,
+      "V_+P": 0.8792862141357592,
+      "F_+P": 0.16981132075471697,
+      "unknown_rate": 0.0595837356947669,
+      "realtime_factor": 455.3786574247658,
+      "confusion_matrix_rows_true_cols_pred_NSVF_Unknown": [
+        [
+          40058,
+          1059,
+          264,
+          148,
+          2006
+        ],
+        [
+          717,
+          319,
+          71,
+          5,
+          687
+        ],
+        [
+          86,
+          46,
+          2513,
+          155,
+          162
+        ],
+        [
+          255,
+          2,
+          10,
+          63,
+          45
+        ]
+      ],
+      "model": "DS1-only evaluation model (patient-wise), via cardiosense_beats.BeatClassifier.classify"
+    }
+  },
+  "limitations": [
+    "Local stand-in trained with a reduced CPU budget; expect it to be somewhat weaker than the Kaggle 3-seed ensemble described in the BRD.",
+    "Single-lead (MLII / lead II) only; not for ischaemia or 12-lead interpretation.",
+    "Supraventricular detection is weak when ectopic beats dominate the rhythm (MIT-BIH record 232); rhythm-level rules (pauses, bradycardia) must cover this case.",
+    "Fusion (F) beats are rarely detected on unseen patients.",
+    "Not validated on AD8232 recordings yet; research and demonstration use only, not a medical device."
+  ]
+}

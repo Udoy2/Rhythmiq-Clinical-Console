@@ -1,0 +1,96 @@
+{
+  "note": "Shipped stand-in (trained on DS1+DS2) run through BeatClassifier.classify, 1 CPU thread. All three records were in its training data, so agreement here is an integration check, NOT a generalisation estimate; see metrics_local.json for patient-wise numbers.",
+  "records": {
+    "100": {
+      "beats": 2271,
+      "ref_beats": 2273,
+      "matched": 2271,
+      "det_Se": 0.9991201055873296,
+      "det_+P": 1.0,
+      "agreement": 0.9995596653456627,
+      "unknown": 0.0,
+      "cpu_s": 3.746672799999942,
+      "realtime_factor": 481.90905689858573,
+      "missed_by_detector": {
+        "N": 2
+      },
+      "N_n": 2237,
+      "N_Se": 0.9995529727313366,
+      "S_n": 33,
+      "S_Se": 1.0,
+      "V_n": 1,
+      "V_Se": 1.0,
+      "split": "DS2"
+    },
+    "119": {
+      "beats": 1986,
+      "ref_beats": 1987,
+      "matched": 1986,
+      "det_Se": 0.9994967287367891,
+      "det_+P": 1.0,
+      "agreement": 1.0,
+      "unknown": 0.0,
+      "cpu_s": 3.4091077800003404,
+      "realtime_factor": 529.6270086114365,
+      "missed_by_detector": {
+        "N": 1
+      },
+      "N_n": 1542,
+      "N_Se": 1.0,
+      "V_n": 444,
+      "V_Se": 1.0,
+      "split": "DS1"
+    },
+    "208": {
+      "beats": 2188,
+      "ref_beats": 2955,
+      "matched": 2186,
+      "det_Se": 0.7397631133671743,
+      "det_+P": 0.9990859232175503,
+      "agreement": 0.9345238095238095,
+      "unknown": 0.024680073126142597,
+      "cpu_s": 3.6143969189997733,
+      "realtime_factor": 499.5454555818995,
+      "missed_by_detector": {
+        "N": 22,
+        "V": 743,
+        "F": 4
+      },
+      "N_n": 1564,
+      "N_Se": 0.9264705882352942,
+      "S_n": 2,
+      "S_Se": 1.0,
+      "V_n": 249,
+      "V_Se": 0.927710843373494,
+      "F_n": 369,
+      "F_Se": 0.9728997289972899,
+      "split": "DS1"
+    },
+    "208.csv": {
+      "beats": 2188,
+      "ref_beats": 2955,
+      "matched": 2186,
+      "det_Se": 0.7397631133671743,
+      "det_+P": 0.9990859232175503,
+      "agreement": 0.9345238095238095,
+      "unknown": 0.024680073126142597,
+      "cpu_s": 4.017806816000302,
+      "realtime_factor": 449.3883449958834,
+      "missed_by_detector": {
+        "N": 22,
+        "V": 743,
+        "F": 4
+      },
+      "N_n": 1564,
+      "N_Se": 0.9264705882352942,
+      "S_n": 2,
+      "S_Se": 1.0,
+      "V_n": 249,
+      "V_Se": 0.927710843373494,
+      "F_n": 369,
+      "F_Se": 0.9728997289972899,
+      "same_beats_as_wfdb": true,
+      "label_match_vs_wfdb": 1.0
+    }
+  }
+}

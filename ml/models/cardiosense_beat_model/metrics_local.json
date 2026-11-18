@@ -1,0 +1,176 @@
+{
+  "stand_in": true,
+  "note": "Measured locally by ml/train_local.py for the CPU stand-in model. NOT the BRD / Kaggle numbers.",
+  "protocol": "patient-wise: trained on MIT-BIH DS1 (22 records, 50981 beats), tested on DS2 (22 unseen records, 49679 beats), cardiologist R-peaks, AAMI N/S/V/F, argmax labels; 1 seed(s) [42], 8 epochs, SWA over last 3",
+  "cfg": {
+    "epochs": 8,
+    "swa_epochs": 3,
+    "batch": 512,
+    "lr": 0.001,
+    "wd": 0.001,
+    "cw_power": 0.5,
+    "label_smoothing": 0.05
+  },
+  "seeds": [
+    42
+  ],
+  "train_wall_time_s": 1914.0242409706116,
+  "ds1_counts": {
+    "N": 45836,
+    "S": 943,
+    "V": 3788,
+    "F": 414
+  },
+  "ds2_counts": {
+    "N": 44234,
+    "S": 1837,
+    "V": 3220,
+    "F": 388
+  },
+  "ds2": {
+    "ensemble": {
+      "acc": 0.9146923247247328,
+      "macroF1": 0.5515742776048518,
+      "N_Se": 0.9509427137496044,
+      "N_+P": 0.9664330844342331,
+      "N_F1": 0.9586253261773721,
+      "S_Se": 0.2672836145890038,
+      "S_+P": 0.25653082549634276,
+      "S_F1": 0.2617968541722207,
+      "V_Se": 0.8695652173913043,
+      "V_+P": 0.7988587731811697,
+      "V_F1": 0.8327137546468402,
+      "F_Se": 0.22164948453608246,
+      "F_+P": 0.11700680272108843,
+      "F_F1": 0.15316117542297417
+    },
+    "per_seed": [
+      {
+        "seed": 42,
+        "acc": 0.9146923247247328,
+        "macroF1": 0.5515742776048518,
+        "N_Se": 0.9509427137496044,
+        "N_+P": 0.9664330844342331,
+        "N_F1": 0.9586253261773721,
+        "S_Se": 0.2672836145890038,
+        "S_+P": 0.25653082549634276,
+        "S_F1": 0.2617968541722207,
+        "V_Se": 0.8695652173913043,
+        "V_+P": 0.7988587731811697,
+        "V_F1": 0.8327137546468402,
+        "F_Se": 0.22164948453608246,
+        "F_+P": 0.11700680272108843,
+        "F_F1": 0.15316117542297417
+      }
+    ],
+    "confusion_matrix": [
+      [
+        42064,
+        1319,
+        444,
+        407
+      ],
+      [
+        1098,
+        491,
+        241,
+        7
+      ],
+      [
+        83,
+        102,
+        2800,
+        235
+      ],
+      [
+        280,
+        2,
+        20,
+        86
+      ]
+    ],
+    "confusion_matrix_axes": "rows = true N,S,V,F; columns = predicted N,S,V,F",
+    "S_Se_without_record_232": 0.5846153846153846,
+    "unknown_threshold_table": [
+      {
+        "threshold": 0.4,
+        "coverage": 0.9832927393868637,
+        "acc_kept": 0.9235194169788532,
+        "acc_flagged_unknown": 0.39518072289156625
+      },
+      {
+        "threshold": 0.5,
+        "coverage": 0.9443024215463274,
+        "acc_kept": 0.939994031377899,
+        "acc_flagged_unknown": 0.4857246114925913
+      },
+      {
+        "threshold": 0.6,
+        "coverage": 0.8915235813925401,
+        "acc_kept": 0.959561977873109,
+        "acc_flagged_unknown": 0.5459268881053999
+      },
+      {
+        "threshold": 0.7,
+        "coverage": 0.8010225648664425,
+        "acc_kept": 0.9720812182741116,
+        "acc_flagged_unknown": 0.6836621143146181
+      },
+      {
+        "threshold": 0.8,
+        "coverage": 0.10873809859296685,
+        "acc_kept": 0.9091077378748612,
+        "acc_flagged_unknown": 0.9153736703028661
+      }
+    ]
+  },
+  "end_to_end": {
+    "condition": "DS2, own R-peak detector, 360 Hz input, labels incl. Unknown threshold (an Unknown beat counts as a miss)",
+    "det_Se": 0.9791599613775346,
+    "det_+P": 0.9991789145250021,
+    "acc": 0.8825173101025251,
+    "macroF1": 0.5441828098981943,
+    "N_Se": 0.9201332261398875,
+    "S_Se": 0.1773207337409672,
+    "V_Se": 0.8484132343011479,
+    "F_Se": 0.168,
+    "N_+P": 0.9742679248954178,
+    "S_+P": 0.22370266479663395,
+    "V_+P": 0.8792862141357592,
+    "F_+P": 0.16981132075471697,
+    "unknown_rate": 0.0595837356947669,
+    "realtime_factor": 455.3786574247658,
+    "confusion_matrix_rows_true_cols_pred_NSVF_Unknown": [
+      [
+        40058,
+        1059,
+        264,
+        148,
+        2006
+      ],
+      [
+        717,
+        319,
+        71,
+        5,
+        687
+      ],
+      [
+        86,
+        46,
+        2513,
+        155,
+        162
+      ],
+      [
+        255,
+        2,
+        10,
+        63,
+        45
+      ]
+    ],
+    "model": "DS1-only evaluation model (patient-wise), via cardiosense_beats.BeatClassifier.classify"
+  },
+  "shipped_weights": "DS1+DS2 deployment model (6 epochs, SWA 2, seed 42); the metrics in this file are from the separate DS1-only evaluation model (8 epochs, SWA 3, seed 42)"
+}
