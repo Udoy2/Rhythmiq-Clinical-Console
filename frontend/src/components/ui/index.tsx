@@ -12,10 +12,10 @@ import { BEAT_STYLE, beatCssBackground, shapeSvgPath, TIER_STYLE, type Shape } f
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> { variant?: Variant; size?: 'sm' | 'md'; busy?: boolean }
 const VARIANT: Record<Variant, string> = {
-  primary: 'bg-teal text-ink-950 hover:bg-[#19BBA9] border-transparent font-semibold',
-  secondary: 'bg-ink-700 text-fg hover:bg-ink-600 border-line',
-  ghost: 'bg-transparent text-fg-muted hover:text-fg hover:bg-ink-700 border-transparent',
-  danger: 'bg-coral-strong text-white hover:bg-[#D23F44] border-transparent font-semibold',
+  primary: 'btn-primary border-transparent',
+  secondary: 'btn-secondary',
+  ghost: 'bg-transparent text-fg-muted hover:text-fg hover:bg-ink-800 border-transparent rounded-full',
+  danger: 'rounded-full bg-coral-strong text-white hover:bg-[#e54840] border-transparent font-semibold',
 };
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   { variant = 'secondary', size = 'md', busy, className, children, disabled, type = 'button', ...rest }, ref,
@@ -27,9 +27,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       disabled={disabled || busy}
       aria-busy={busy || undefined}
       className={cx(
-        'inline-flex items-center justify-center gap-1.5 rounded border whitespace-nowrap transition-colors',
+        'inline-flex items-center justify-center gap-1.5 whitespace-nowrap transition-colors',
         'disabled:opacity-50 disabled:cursor-not-allowed',
-        size === 'sm' ? 'h-7 px-2 text-xs' : 'h-8 px-3 text-sm',
+        size === 'sm' ? 'h-7 px-2.5 text-xs' : 'h-9 px-3.5 text-sm',
+        variant === 'danger' || variant === 'ghost' ? 'border' : '',
         VARIANT[variant], className,
       )}
       {...rest}
@@ -53,7 +54,7 @@ export function Spinner({ size = 16, label }: { size?: number; label?: string })
   );
 }
 export function Skeleton({ className }: { className?: string }) {
-  return <div className={cx('animate-pulse rounded bg-ink-700/70', className)} aria-hidden="true" />;
+  return <div className={cx('animate-pulse rounded bg-ink-700', className)} aria-hidden="true" />;
 }
 
 // ───────────── Shape glyph ─────────────
@@ -74,12 +75,12 @@ export function TierBadge({ tier, score, compact }: { tier: Tier | null | undefi
   const st = TIER_STYLE[tier];
   return (
     <span
-      className="inline-flex items-center gap-1.5 rounded border px-1.5 py-0.5 text-xs font-medium whitespace-nowrap"
-      style={{ borderColor: st.color, background: st.bg, color: st.text }}
+      className="inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium whitespace-nowrap backdrop-blur"
+      style={{ borderColor: `${st.color}66`, background: st.bg, color: st.text }}
     >
       <ShapeGlyph shape={st.shape} color={st.color} size={11} />
       <span>{compact ? st.meaning : `${st.name} — ${st.meaning}`}</span>
-      {typeof score === 'number' && <span className="num text-fg border-l pl-1.5" style={{ borderColor: `${st.color}80` }}>{Math.round(score)}</span>}
+      {typeof score === 'number' && <span className="num border-l border-line pl-1.5">{Math.round(score)}</span>}
     </span>
   );
 }
@@ -124,14 +125,14 @@ export function Badge({ children, tone = 'neutral', className, title }: {
   children: ReactNode; tone?: 'neutral' | 'teal' | 'amber' | 'coral' | 'outline'; className?: string; title?: string;
 }) {
   const tones = {
-    neutral: 'bg-ink-700 text-fg-muted border-line',
-    teal: 'bg-teal-dim/60 text-teal-text border-teal/50',
-    amber: 'bg-amber-dim text-amber-text border-amber/60',
-    coral: 'bg-coral-dim text-coral-text border-coral/60',
+    neutral: 'bg-ink-800 text-fg-muted border-line',
+    teal: 'bg-teal-dim text-teal-text border-teal/40',
+    amber: 'bg-amber-dim text-amber-text border-amber/50',
+    coral: 'bg-coral-dim text-coral-text border-coral/50',
     outline: 'bg-transparent text-fg-muted border-line',
   } as const;
   return (
-    <span title={title} className={cx('inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-2xs font-semibold tracking-wide whitespace-nowrap', tones[tone], className)}>
+    <span title={title} className={cx('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-2xs font-semibold tracking-wide whitespace-nowrap backdrop-blur', tones[tone], className)}>
       {children}
     </span>
   );
@@ -143,10 +144,10 @@ export function DemoBadge({ className }: { className?: string }) {
 // ───────────── Banner ─────────────
 type Tone = 'info' | 'warn' | 'critical' | 'ok';
 const BANNER: Record<Tone, { cls: string; shape: Shape; color: string }> = {
-  info: { cls: 'border-line bg-ink-800 text-fg', shape: 'circle', color: '#A9B8C6' },
-  ok: { cls: 'border-teal/50 bg-teal-dim/40 text-fg', shape: 'circle', color: '#00A896' },
-  warn: { cls: 'border-amber/70 bg-amber-dim text-fg', shape: 'triangle', color: '#C9820A' },
-  critical: { cls: 'border-coral/70 bg-coral-dim text-fg', shape: 'octagon', color: '#E0484D' },
+  info: { cls: 'border-line bg-ink-800 text-fg', shape: 'circle', color: '#0891b2' },
+  ok: { cls: 'border-teal/40 bg-teal-dim text-fg', shape: 'circle', color: '#00B86B' },
+  warn: { cls: 'border-amber/50 bg-amber-dim text-fg', shape: 'triangle', color: '#d97706' },
+  critical: { cls: 'border-coral/50 bg-coral-dim text-fg', shape: 'octagon', color: '#FF5F57' },
 };
 export function Banner({ tone = 'info', title, children, action, live }: {
   tone?: Tone; title: ReactNode; children?: ReactNode; action?: ReactNode; live?: boolean;
@@ -247,7 +248,7 @@ export function Segmented<T extends string | number>({ label, value, options, on
   label: string; value: T; options: readonly T[]; onChange: (v: T) => void; format?: (v: T) => ReactNode; size?: 'sm' | 'md';
 }) {
   return (
-    <div role="radiogroup" aria-label={label} className="inline-flex rounded border border-line bg-ink-900 p-0.5">
+    <div role="radiogroup" aria-label={label} className="inline-flex rounded-full border border-line bg-ink-800 p-0.5">
       {options.map((o) => {
         const on = o === value;
         return (
@@ -258,9 +259,9 @@ export function Segmented<T extends string | number>({ label, value, options, on
             aria-checked={on}
             onClick={() => onChange(o)}
             className={cx(
-              'rounded-[3px] px-2 num whitespace-nowrap transition-colors',
+              'rounded-full px-2 num whitespace-nowrap transition-colors',
               size === 'sm' ? 'h-6 text-xs' : 'h-7 text-sm',
-              on ? 'bg-ink-600 text-fg font-semibold shadow-[inset_0_-2px_0_#00A896]' : 'text-fg-muted hover:text-fg',
+              on ? 'bg-white text-navy font-semibold shadow-sm ring-1 ring-[var(--rq-green)]' : 'text-fg-muted hover:text-fg',
             )}
           >
             {format ? format(o) : String(o)}
@@ -282,7 +283,7 @@ export function Toggle({ checked, onChange, label, disabled }: { checked: boolea
       className="inline-flex items-center gap-2 text-xs text-fg-muted hover:text-fg disabled:opacity-50 disabled:cursor-not-allowed"
     >
       <span className={cx('relative inline-block h-4 w-7 rounded-full border transition-colors', checked ? 'bg-teal border-teal' : 'bg-ink-700 border-line')}>
-        <span className={cx('absolute top-[1px] h-3 w-3 rounded-full transition-all', checked ? 'left-[13px] bg-ink-950' : 'left-[1px] bg-fg-muted')} />
+        <span className={cx('absolute top-[1px] h-3 w-3 rounded-full transition-all', checked ? 'left-[13px] bg-white' : 'left-[1px] bg-fg-muted')} />
       </span>
       <span>{label}</span>
       <span className="sr-only">{checked ? 'on' : 'off'}</span>
@@ -308,7 +309,7 @@ export function Dialog({ open, onClose, title, children, footer, wide }: {
       aria-labelledby={titleId}
       onCancel={(e) => { e.preventDefault(); onClose(); }}
       onClick={(e) => { if (e.target === ref.current) onClose(); }}
-      className={cx('m-auto w-[calc(100%-2rem)] rounded-md border border-line bg-ink-800 p-0 text-fg backdrop:bg-black/60', wide ? 'max-w-2xl' : 'max-w-md')}
+      className={cx('m-auto w-[calc(100%-2rem)] rounded-md border border-line bg-white p-0 text-fg shadow-md backdrop:bg-navy/45', wide ? 'max-w-2xl' : 'max-w-md')}
     >
       {open && (
         <div className="flex max-h-[85vh] flex-col">

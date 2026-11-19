@@ -3,6 +3,7 @@ import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { AppShell } from './layout/AppShell';
 import { LoadingState } from './components/ui';
 import { canSeeAlerts, canManageDevices, isAdmin, useAuth } from './state/auth';
+import { LandingPage } from './pages/Landing';
 import { SignInPage } from './pages/SignIn';
 import { PatientsPage } from './pages/Patients';
 import { PatientLayout } from './pages/PatientLayout';
@@ -47,9 +48,9 @@ function RequireRole({ allow }: { allow: (r: Parameters<typeof isAdmin>[0]) => b
 export function App() {
   return (
     <Routes>
+      <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<SignInPage />} />
       <Route element={<RequireAuth />}>
-        <Route index element={<Navigate to="/patients" replace />} />
         <Route path="/patients" element={<PatientsPage />} />
         <Route path="/patients/:id" element={<PatientLayout />}>
           <Route index element={<Navigate to="live" replace />} />

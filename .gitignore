@@ -23,3 +23,9 @@ Thumbs.db
 .vscode/
 .idea/
 *.log
+
+# Local AI / design tooling (not product source)
+.claude/
+.cursor/
+.impeccable/
+**/.impeccable/

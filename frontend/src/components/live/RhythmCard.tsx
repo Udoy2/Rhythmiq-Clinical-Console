@@ -9,7 +9,7 @@ export function FindingChip({ f }: { f: Finding }) {
   return (
     <span
       className="inline-flex items-center gap-1.5 rounded border px-1.5 py-0.5 text-xs font-medium"
-      style={{ borderColor: st.color, background: st.bg, color: '#E6EDF3' }}
+      style={{ borderColor: st.color, background: st.bg, color: st.text }}
       title={`${f.detail || f.label} — rule ${f.rule_id}, ${st.name} (${st.meaning})`}
     >
       <ShapeGlyph shape={st.shape} color={st.color} size={10} />
@@ -72,8 +72,8 @@ export function VitalsStrip({ window: w }: { window: RhythmWindow | null }) {
       <Stat label="HR" value={fmtNum(w?.hr_bpm, 0)} unit="bpm" />
       <Stat label="SDNN" value={fmtNum(w?.sdnn_ms, 0)} unit="ms" sub="HRV, normal-to-normal" />
       <Stat label="RMSSD" value={fmtNum(w?.rmssd_ms, 0)} unit="ms" sub="HRV, beat-to-beat" />
-      <Stat label="S burden" value={w ? fmtPct(w.s_burden_pct) : '—'} sub="supraventricular ectopic" tone={w && w.s_burden_pct >= 1 ? '#EBA63A' : undefined} />
-      <Stat label="V burden" value={w ? fmtPct(w.v_burden_pct) : '—'} sub="ventricular ectopic" tone={w && w.v_burden_pct >= 1 ? '#FF8589' : undefined} />
+      <Stat label="S burden" value={w ? fmtPct(w.s_burden_pct) : '—'} sub="supraventricular ectopic" tone={w && w.s_burden_pct >= 1 ? '#b45309' : undefined} />
+      <Stat label="V burden" value={w ? fmtPct(w.v_burden_pct) : '—'} sub="ventricular ectopic" tone={w && w.v_burden_pct >= 1 ? '#b42318' : undefined} />
       <div className="min-w-0">
         <div className="label">Beats in window</div>
         {c ? (

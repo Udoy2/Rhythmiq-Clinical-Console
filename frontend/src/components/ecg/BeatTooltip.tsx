@@ -66,7 +66,7 @@ export function BeatDetails({ beat }: { beat: TimedBeat }) {
 
 export function BeatTooltip({ beat, pinned }: { beat: TimedBeat; pinned?: boolean }) {
   return (
-    <div role="tooltip" className="rounded border border-line bg-ink-800/95 p-2 text-xs shadow-lg shadow-black/50">
+    <div role="tooltip" className="rounded border border-line bg-white p-2 text-xs shadow-md">
       <BeatDetails beat={beat} />
       <div className="mt-1 text-2xs text-fg-faint">{pinned ? 'Pinned — click again or press Esc to release' : 'Click to pin'}</div>
       <span className="sr-only" aria-live="polite">

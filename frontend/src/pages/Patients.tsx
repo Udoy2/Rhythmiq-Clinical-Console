@@ -160,7 +160,7 @@ function CreatePatientDialog({ onClose }: { onClose: () => void }) {
         </Field>
         <Field label="Clinical notes (optional)">{(id) => <textarea id={id} className="input min-h-[4rem]" value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} />}</Field>
         <label className="flex items-start gap-2 rounded border border-line bg-ink-900 p-2.5 text-sm">
-          <input type="checkbox" className="mt-0.5 h-4 w-4 accent-[#00A896]" checked={f.consent} onChange={(e) => setF({ ...f, consent: e.target.checked })} />
+          <input type="checkbox" className="mt-0.5 h-4 w-4 accent-[#1e3a5f]" checked={f.consent} onChange={(e) => setF({ ...f, consent: e.target.checked })} />
           <span>
             <span className="font-medium text-fg">The patient has given informed consent</span>
             <span className="block text-xs text-fg-muted">Consent to ECG recording and processing is required before a device can stream for this patient.</span>

@@ -9,12 +9,12 @@ export function Toaster() {
     <div className="pointer-events-none fixed right-3 top-14 z-50 flex w-[22rem] max-w-[calc(100vw-1.5rem)] flex-col gap-2" aria-live="assertive">
       {toasts.map((t) => {
         const tier = t.tier ? TIER_STYLE[t.tier] : null;
-        const color = tier?.color ?? (t.tone === 'error' ? '#E0484D' : t.tone === 'ok' ? '#00A896' : '#A9B8C6');
+        const color = tier?.color ?? (t.tone === 'error' ? '#b42318' : t.tone === 'ok' ? '#1f7a4d' : '#6b7c90');
         return (
           <div
             key={t.id}
             role={t.tone === 'alert' || t.tone === 'error' ? 'alert' : 'status'}
-            className="pointer-events-auto rounded-md border bg-ink-800 px-3 py-2.5 shadow-lg shadow-black/40"
+            className="pointer-events-auto rounded-md border bg-white border-line px-3 py-2.5 shadow-sm"
             style={{ borderColor: color, borderLeftWidth: 4 }}
           >
             <div className="flex items-start gap-2">

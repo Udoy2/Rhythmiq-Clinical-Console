@@ -1,0 +1,62 @@
+/* RHYTHMIQ Design System — Futuristic AI Healthcare */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root {
+  color-scheme: light;
+  --rq-navy: #0B1F3A;
+  --rq-blue: #234879;
+  --rq-green: #00B86B;
+  --rq-green-bright: #22D889;
+  --rq-cyan: #22D3EE;
+  --rq-coral: #FF5F57;
+  --rq-ink: #10243E;
+  --rq-muted: #64748B;
+  --rq-bg: #F5F7FA;
+  --rq-surface: #FFFFFF;
+  --rq-border: #DCE5EE;
+  --rq-radius: 20px;
+  --rq-shadow: 0 18px 50px rgba(11,31,58,.10);
+  --rq-gradient: linear-gradient(110deg, var(--rq-green), var(--rq-cyan));
+  font-family: "DM Sans", sans-serif;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; color: var(--rq-ink); background: var(--rq-bg); }
+h1,h2,h3,h4 { font-family: "Manrope", sans-serif; letter-spacing: -.035em; }
+a { color: inherit; text-decoration: none; }
+.container { width: min(1160px, calc(100% - 40px)); margin-inline: auto; }
+.navbar { position: sticky; top: 0; z-index: 10; background: rgba(11,31,58,.92); backdrop-filter: blur(16px); color: white; border-bottom: 1px solid #ffffff20; }
+.nav-inner { min-height: 76px; display:flex; align-items:center; justify-content:space-between; gap:24px; }
+.brand { display:flex; align-items:center; gap:12px; font:800 1.05rem "Manrope",sans-serif; letter-spacing:.08em; }
+.brand img { width:48px; height:48px; object-fit:contain; }
+.brand small { display:block; color:var(--rq-green-bright); font:700 .62rem "DM Sans",sans-serif; letter-spacing:.35em; margin-top:2px; }
+.nav-links { display:flex; align-items:center; gap:28px; color:#d8e6f4; font-size:.9rem; }
+.nav-links a:hover { color:var(--rq-cyan); }
+.btn { display:inline-flex; align-items:center; justify-content:center; gap:10px; border:0; border-radius:999px; padding:14px 22px; font-weight:700; cursor:pointer; transition:.2s ease; }
+.btn-primary { color:var(--rq-navy); background:var(--rq-gradient); box-shadow:0 8px 24px #00b86b35; }
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 12px 30px #00b86b55; }
+.btn-outline { color:white; border:1px solid #ffffff66; background:transparent; }
+.hero { position:relative; overflow:hidden; color:white; background:radial-gradient(ellipse at 80% 35%, #075d75 0, transparent 34%), linear-gradient(125deg,#07172c,#0b3150 58%,#063e4b); padding:100px 0 112px; }
+.hero:before { content:""; position:absolute; inset:0; opacity:.45; background:url("../assets/patterns/ecg-grid.svg") center/cover no-repeat; pointer-events:none; }
+.hero-content { position:relative; z-index:1; max-width:690px; }
+.eyebrow { color:var(--rq-green-bright); text-transform:uppercase; letter-spacing:.22em; font-size:.76rem; font-weight:800; }
+.hero h1 { font-size:clamp(2.7rem,6vw,5.2rem); line-height:1.04; margin:18px 0; }
+.gradient-text { background:var(--rq-gradient); color:transparent; background-clip:text; }
+.hero p { color:#d2e4f3; max-width:570px; font-size:1.12rem; line-height:1.8; }
+.hero-actions { display:flex; flex-wrap:wrap; gap:14px; margin-top:30px; }
+.section { padding:88px 0; }
+.section-heading { max-width:650px; margin-bottom:36px; }
+.section-heading h2 { font-size:clamp(2rem,4vw,3.2rem); margin:12px 0; }
+.section-heading p { color:var(--rq-muted); line-height:1.8; }
+.grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+.card { background:var(--rq-surface); border:1px solid var(--rq-border); border-radius:var(--rq-radius); padding:28px; box-shadow:var(--rq-shadow); }
+.card-icon { width:52px; height:52px; display:grid; place-items:center; border-radius:16px; color:var(--rq-green); background:#00b86b14; }
+.card h3 { margin:18px 0 8px; }
+.card p { color:var(--rq-muted); line-height:1.7; }
+.stat { font:800 2.2rem "Manrope",sans-serif; color:var(--rq-green); }
+.cta { color:white; background:linear-gradient(120deg,#0B1F3A,#0B5260); border-radius:28px; padding:54px; position:relative; overflow:hidden; }
+.cta:after { content:""; position:absolute; width:360px; height:360px; right:-80px; top:-170px; border:1px solid #22D3EE55; border-radius:50%; box-shadow:0 0 0 35px #22D3EE10,0 0 0 75px #22D3EE08; }
+.footer { background:#07172c; color:#c6d6e5; padding:48px 0; }
+.footer-grid { display:flex; justify-content:space-between; gap:28px; flex-wrap:wrap; }
+.footer p { color:#8fa5bb; }
+@media(max-width:800px){ .nav-links{display:none} .hero{padding:76px 0 88px} .grid-3{grid-template-columns:1fr} .section{padding:64px 0} .cta{padding:34px 24px} }
