@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "appRoot": "D:\\test_ubuntu\\ecgArithmia\\frontend",
+  "repoRoot": "D:\\test_ubuntu\\ecgArithmia",
+  "contextRoot": "D:\\test_ubuntu\\ecgArithmia",
+  "sessionRoot": "D:\\test_ubuntu\\ecgArithmia\\frontend\\.impeccable\\live",
+  "productPath": "D:\\test_ubuntu\\ecgArithmia\\PRODUCT.md",
+  "designPath": "D:\\test_ubuntu\\ecgArithmia\\DESIGN.md",
+  "resolvedFrom": "target:frontend\\src\\pages\\SignIn.tsx"
+}
