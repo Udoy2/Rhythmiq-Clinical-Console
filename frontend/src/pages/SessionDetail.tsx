@@ -202,7 +202,7 @@ function ReplayPlayer({ session, durationS, truncated }: { session: Session; dur
         <div className="mt-2 flex items-center gap-3">
           <span className="num w-14 text-right text-sm text-fg">{fmtClock(pos)}</span>
           <label htmlFor="scrub" className="sr-only">Position in session</label>
-          <input id="scrub" type="range" min={0} max={durationS} step={0.5} value={pos} className="h-1.5 flex-1 accent-[#00A896]"
+          <input id="scrub" type="range" min={0} max={durationS} step={0.5} value={pos} className="h-1.5 flex-1 accent-[#1e3a5f]"
             aria-valuetext={`${fmtClock(pos)} of ${fmtClock(durationS)}`}
             onChange={(e) => { wantPlay.current = false; clock.pause(performance.now()); setPlaying(false); seek(Number(e.target.value)); }} />
           <span className="num w-14 text-sm text-fg-muted">{fmtClock(durationS)}</span>
@@ -235,7 +235,7 @@ function ReplayPlayer({ session, durationS, truncated }: { session: Session; dur
                       aria-label={`Go to ${fmtClock(e.start_s ?? 0)}`}>
                       {e.start_s !== null ? fmtClock(e.start_s) : '—'}
                     </button>
-                    <span className="inline-flex w-20 shrink-0 items-center gap-1.5 text-xs" style={{ color: st?.text ?? '#A9B8C6' }}>
+                    <span className="inline-flex w-20 shrink-0 items-center gap-1.5 text-xs" style={{ color: st?.text ?? '#6b7c90' }}>
                       {st && <ShapeGlyph shape={st.shape} color={st.color} size={10} />}{st ? st.meaning : e.kind}
                     </span>
                     <span className="min-w-0 flex-1 truncate text-fg" title={e.detail}>{e.label}{e.detail && e.detail !== e.label ? <span className="text-fg-muted"> — {e.detail}</span> : null}</span>

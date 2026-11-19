@@ -157,13 +157,13 @@ function TrendCharts({ trends, hover, onHover, fmt }: { trends: Trends; hover: n
   return (
     <div>
       <div className="grid grid-cols-1 gap-x-4 gap-y-4 lg:grid-cols-2">
-        <TrendChart title="Heart rate" unit="bpm" series={[{ key: 'hr', label: 'HR', color: '#00A896' }]} {...common} />
-        <TrendChart title="Risk score" unit="of 100" domain={[0, 100]} series={[{ key: 'risk', label: 'Risk', color: '#A9B8C6' }]} {...common} />
-        <TrendChart title="V burden" unit="%" includeZero digits={1} series={[{ key: 'v', label: 'V burden', color: '#E0484D' }]} {...common} />
-        <TrendChart title="S burden" unit="%" includeZero digits={1} series={[{ key: 's', label: 'S burden', color: '#C9820A' }]} {...common} />
+        <TrendChart title="Heart rate" unit="bpm" series={[{ key: 'hr', label: 'HR', color: '#1f7a4d' }]} {...common} />
+        <TrendChart title="Risk score" unit="of 100" domain={[0, 100]} series={[{ key: 'risk', label: 'Risk', color: '#6b7c90' }]} {...common} />
+        <TrendChart title="V burden" unit="%" includeZero digits={1} series={[{ key: 'v', label: 'V burden', color: '#b42318' }]} {...common} />
+        <TrendChart title="S burden" unit="%" includeZero digits={1} series={[{ key: 's', label: 'S burden', color: '#b45309' }]} {...common} />
         <div className="lg:col-span-2">
           <TrendChart title="Heart-rate variability" unit="ms" includeZero
-            series={[{ key: 'sdnn', label: 'SDNN', color: '#00A896' }, { key: 'rmssd', label: 'RMSSD', color: '#8E7CF0', dashed: true }]} {...common} />
+            series={[{ key: 'sdnn', label: 'SDNN', color: '#1f7a4d' }, { key: 'rmssd', label: 'RMSSD', color: '#1d4ed8', dashed: true }]} {...common} />
         </div>
       </div>
       <p className="mt-2 text-xs text-fg-muted">
@@ -202,7 +202,7 @@ function Timeline({ alerts, range }: { alerts: Alert[]; range: TrendRange }) {
   if (inRange.length === 0) return <p className="py-2 text-sm text-fg-muted">No alerts were raised in this period.</p>;
   return (
     <div>
-      <div className="relative mb-3 h-9 rounded-[3px] border border-line bg-[#081724]" role="img" aria-label={`${inRange.length} alerts on a time axis; details are in the list below`}>
+      <div className="relative mb-3 h-9 rounded-sm border border-line bg-white" role="img" aria-label={`${inRange.length} alerts on a time axis; details are in the list below`}>
         {inRange.map(({ a, t }) => {
           const st = TIER_STYLE[a.tier] ?? TIER_STYLE.amber;
           return (

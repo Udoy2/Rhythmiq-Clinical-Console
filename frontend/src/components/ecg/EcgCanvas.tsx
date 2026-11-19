@@ -32,12 +32,20 @@ export function autoHeightMm(widthPx: number, refWindowS = 6): number {
   return Math.max(25, Math.min(40, Math.floor(300 / pxPerMm / 5) * 5));
 }
 
-const BG = '#06131F';
-const TRACE = '#D9F3EE';
-const MINOR = 'rgba(126,164,196,0.11)';
-const MAJOR = 'rgba(126,164,196,0.27)';
-const FAINT = '#7F93A6';
-const MUTED = '#A9B8C6';
+const BG = '#FFFFFF';
+const TRACE = '#0B1F3A';
+const MINOR = 'rgba(0,184,107,0.10)';
+const MAJOR = 'rgba(0,184,107,0.22)';
+const FAINT = '#64748B';
+const MUTED = '#475569';
+const BAND_BG = '#F5F7FA';
+const ACTIVE = 'rgba(34, 211, 238, 0.18)';
+const MISMATCH = '#b42318';
+const GAP_FILL = 'rgba(180, 83, 9, 0.10)';
+const GAP_STROKE = 'rgba(180, 83, 9, 0.45)';
+const GAP_TEXT = '#92400e';
+const CAL_BG = 'rgba(245, 247, 250, 0.95)';
+const CAL_STROKE = 'rgba(11, 31, 58, 0.55)';
 const MONO = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
 const ROW_H = 20;
 const TOOLTIP_W = 232;
@@ -239,7 +247,7 @@ export function EcgCanvas({
       role="group"
       aria-label={`${ariaLabel ?? 'ECG waveform'}. Keys: space pauses, left and right arrows scroll, comma and period step through beats, escape clears the selection.`}
       onKeyDown={onKeyDown}
-      className="relative w-full select-none overflow-hidden rounded-[3px] border border-line bg-[#06131F] focus-visible:outline-2"
+      className="relative w-full select-none overflow-hidden rounded-2xl border border-line bg-white focus-visible:outline-2 shadow-md"
       style={{ height: width > 0 ? cssH + 2 : undefined, minHeight: 120 }}
     >
       <canvas
@@ -362,7 +370,7 @@ function drawFrame(
     const st = BEAT_STYLE[bt.label] ?? BEAT_STYLE.Unknown;
     const isActive = bt.sample === pinnedSample || (pinnedSample === null && bt.sample === hoverSample);
     if (isActive) {
-      ctx.strokeStyle = 'rgba(230,237,243,0.55)';
+      ctx.strokeStyle = ACTIVE;
       ctx.lineWidth = 1;
       ctx.setLineDash([3, 3]);
       ctx.beginPath();
@@ -376,14 +384,14 @@ function drawFrame(
     }
     drawBeatShape(ctx, bt.label, x, my, 4);
     ctx.font = `600 11px ${MONO}`;
-    ctx.fillStyle = st.text;
+    ctx.fillStyle = st.color;
     ctx.fillText(st.letter, x, my - 9);
   }
 
   // model / ground-truth rows
   if (showTruth && band > 0) {
     const top = plotH;
-    ctx.fillStyle = '#0B1B2B';
+    ctx.fillStyle = BAND_BG;
     ctx.fillRect(0, top, W, band);
     ctx.fillStyle = MAJOR;
     ctx.fillRect(0, top, W, 1);
@@ -396,7 +404,7 @@ function drawFrame(
       const x = xOfTime(s, bt.t, head);
       if (x < 46) continue; // under the row captions
       const st = BEAT_STYLE[bt.label] ?? BEAT_STYLE.Unknown;
-      ctx.fillStyle = st.text;
+      ctx.fillStyle = st.color;
       ctx.fillText(st.letter, x, yModel);
       const ag = agreement(bt);
       if (ag === 'none') {
@@ -405,21 +413,21 @@ function drawFrame(
         continue;
       }
       const tst = BEAT_STYLE[bt.truth as BeatLabel] ?? BEAT_STYLE.Unknown;
-      ctx.fillStyle = ag === 'mismatch' ? '#FFFFFF' : tst.text;
+      ctx.fillStyle = ag === 'mismatch' ? TRACE : tst.color;
       ctx.fillText(tst.letter, x, yTruth);
       if (ag === 'mismatch') {
         // disagreement: boxed across both rows + a "≠" tick, so it does not rely on colour
-        ctx.strokeStyle = '#FF8589';
+        ctx.strokeStyle = MISMATCH;
         ctx.lineWidth = 1.5;
         ctx.strokeRect(Math.round(x - 8) + 0.5, top + 3.5, 16, band - 6);
-        ctx.fillStyle = '#FF8589';
+        ctx.fillStyle = MISMATCH;
         ctx.beginPath();
         ctx.moveTo(x - 4, top); ctx.lineTo(x + 4, top); ctx.lineTo(x, top - 6); ctx.closePath();
         ctx.fill();
       }
     }
     // row captions (fixed)
-    ctx.fillStyle = '#0B1B2B';
+    ctx.fillStyle = BAND_BG;
     ctx.fillRect(0, top + 1, 44, band - 1);
     ctx.fillStyle = MUTED;
     ctx.font = `10px ${MONO}`;
@@ -438,13 +446,13 @@ function drawFrame(
     ctx.textBaseline = 'alphabetic';
     const tw = ctx.measureText(text).width;
     const showPulse = calH <= plotH * 0.45;
-    ctx.fillStyle = 'rgba(6,19,31,0.88)';
+    ctx.fillStyle = CAL_BG;
     ctx.fillRect(0, 0, tw + 12, 16);
     ctx.fillStyle = MUTED;
     ctx.fillText(text, 6, 11);
     if (showPulse) {
       const bx = 6, top = 22, baseY = top + calH;
-      ctx.strokeStyle = 'rgba(169,184,198,0.75)'; // no backdrop: the pulse must not hide the trace under it
+      ctx.strokeStyle = CAL_STROKE; // no backdrop: the pulse must not hide the trace under it
       ctx.lineWidth = 1.25;
       ctx.beginPath();
       ctx.moveTo(bx - 3, baseY); ctx.lineTo(bx, baseY); ctx.lineTo(bx, top); ctx.lineTo(bx + calW, top);
@@ -460,16 +468,16 @@ function drawGap(ctx: CanvasRenderingContext2D, x0: number, x1: number, plotH: n
   ctx.beginPath();
   ctx.rect(x0, 0, x1 - x0, plotH);
   ctx.clip();
-  ctx.fillStyle = 'rgba(201,130,10,0.10)';
+  ctx.fillStyle = GAP_FILL;
   ctx.fillRect(x0, 0, x1 - x0, plotH);
-  ctx.strokeStyle = 'rgba(201,130,10,0.45)';
+  ctx.strokeStyle = GAP_STROKE;
   ctx.lineWidth = 1;
   ctx.beginPath();
   for (let x = x0 - plotH; x < x1; x += 9) { ctx.moveTo(x, plotH); ctx.lineTo(x + plotH, 0); }
   ctx.stroke();
   ctx.restore();
   if (x1 - x0 > 64) {
-    ctx.fillStyle = '#EBA63A';
+    ctx.fillStyle = GAP_TEXT;
     ctx.font = `600 10px ${MONO}`;
     ctx.textAlign = 'center';
     ctx.fillText('GAP — no data', (x0 + x1) / 2, 14);

@@ -6,9 +6,9 @@ export type Pattern = 'solid' | 'diagonal' | 'cross' | 'dots' | 'hollow';
 export interface BeatStyle {
   letter: string;
   name: string;
-  /** Fill colour for shapes / blocks (>= 3:1 on the dark surface). */
+  /** Fill colour for shapes / blocks (>= 3:1 on light surfaces). */
   color: string;
-  /** Text colour (>= 4.5:1 on the dark surface). */
+  /** Text colour (>= 4.5:1 on light surfaces). */
   text: string;
   shape: Shape;
   pattern: Pattern;
@@ -18,19 +18,19 @@ export interface BeatStyle {
 
 /** Class encoding is always colour + letter + shape + pattern (never colour alone). */
 export const BEAT_STYLE: Record<BeatLabel, BeatStyle> = {
-  N: { letter: 'N', name: 'Normal', color: '#00A896', text: '#2CC7B5', shape: 'circle', pattern: 'solid', height: 0.5 },
-  S: { letter: 'S', name: 'Supraventricular ectopic', color: '#C9820A', text: '#EBA63A', shape: 'triangle', pattern: 'diagonal', height: 0.75 },
-  V: { letter: 'V', name: 'Ventricular ectopic', color: '#E0484D', text: '#FF8589', shape: 'square', pattern: 'cross', height: 1 },
-  F: { letter: 'F', name: 'Fusion', color: '#8E7CF0', text: '#B9ADFF', shape: 'diamond', pattern: 'dots', height: 0.75 },
-  Unknown: { letter: '?', name: 'Unknown (low confidence)', color: '#8A9BAC', text: '#A9B8C6', shape: 'ring', pattern: 'hollow', height: 0.5 },
+  N: { letter: 'N', name: 'Normal', color: '#00B86B', text: '#047857', shape: 'circle', pattern: 'solid', height: 0.5 },
+  S: { letter: 'S', name: 'Supraventricular ectopic', color: '#d97706', text: '#b45309', shape: 'triangle', pattern: 'diagonal', height: 0.75 },
+  V: { letter: 'V', name: 'Ventricular ectopic', color: '#FF5F57', text: '#dc2626', shape: 'square', pattern: 'cross', height: 1 },
+  F: { letter: 'F', name: 'Fusion', color: '#0891b2', text: '#0e7490', shape: 'diamond', pattern: 'dots', height: 0.75 },
+  Unknown: { letter: '?', name: 'Unknown (low confidence)', color: '#64748B', text: '#475569', shape: 'ring', pattern: 'hollow', height: 0.5 },
 };
 
 export interface TierStyle { name: string; meaning: string; color: string; text: string; bg: string; shape: Shape; action: string }
 export const TIER_STYLE: Record<Tier, TierStyle> = {
-  green: { name: 'Green', meaning: 'Normal', color: '#00A896', text: '#2CC7B5', bg: '#0A3B3A', shape: 'circle', action: 'No action' },
-  amber: { name: 'Amber', meaning: 'Watch', color: '#C9820A', text: '#EBA63A', bg: '#3D2C0F', shape: 'triangle', action: 'Review within 24 h' },
-  orange: { name: 'Orange', meaning: 'Urgent', color: '#E8762B', text: '#FF9A55', bg: '#44260F', shape: 'diamond', action: 'Acknowledge within 30 min' },
-  red: { name: 'Red', meaning: 'Critical', color: '#E0484D', text: '#FF8589', bg: '#471A20', shape: 'octagon', action: 'Immediate review' },
+  green: { name: 'Green', meaning: 'Normal', color: '#00B86B', text: '#047857', bg: 'rgba(0, 184, 107, 0.12)', shape: 'circle', action: 'No action' },
+  amber: { name: 'Amber', meaning: 'Watch', color: '#d97706', text: '#b45309', bg: 'rgba(217, 119, 6, 0.12)', shape: 'triangle', action: 'Review within 24 h' },
+  orange: { name: 'Orange', meaning: 'Urgent', color: '#ea580c', text: '#c2410c', bg: 'rgba(234, 88, 12, 0.12)', shape: 'diamond', action: 'Acknowledge within 30 min' },
+  red: { name: 'Red', meaning: 'Critical', color: '#FF5F57', text: '#dc2626', bg: 'rgba(255, 95, 87, 0.12)', shape: 'octagon', action: 'Immediate review' },
 };
 export const tierLabel = (t: Tier) => `${TIER_STYLE[t].name} — ${TIER_STYLE[t].meaning}`;
 
@@ -132,7 +132,7 @@ export function beatFill(ctx: CanvasRenderingContext2D, label: BeatLabel, dpr = 
     g.stroke();
   } else if (st.pattern === 'cross') {
     // dark horizontal bars cut into the solid block
-    g.strokeStyle = 'rgba(11,27,43,0.55)';
+    g.strokeStyle = 'rgba(11,31,58,0.45)';
     g.beginPath();
     g.moveTo(0, 2.5); g.lineTo(n, 2.5);
     g.stroke();
@@ -153,7 +153,7 @@ export function beatCssBackground(label: BeatLabel): string {
   switch (st.pattern) {
     case 'solid': return st.color;
     case 'diagonal': return `repeating-linear-gradient(135deg, ${st.color} 0 1.5px, ${st.color}47 1.5px 5px)`;
-    case 'cross': return `repeating-linear-gradient(0deg, ${st.color} 0 4px, rgba(11,27,43,0.55) 4px 5.5px)`;
+    case 'cross': return `repeating-linear-gradient(0deg, ${st.color} 0 4px, rgba(11,31,58,0.45) 4px 5.5px)`;
     case 'dots': return `radial-gradient(${st.color} 1.2px, ${st.color}47 1.4px) 0 0 / 5px 5px`;
     case 'hollow': return 'transparent';
   }

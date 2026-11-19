@@ -1,8 +1,9 @@
 import { useState, type FormEvent } from 'react';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { ApiError, errorText } from '../api/client';
 import { api } from '../api/endpoints';
 import { transport } from '../api/transport';
+import { BrandLogo } from '../components/BrandLogo';
 import { Banner, Button, Field } from '../components/ui';
 import { Disclaimer, MockBadge } from '../layout/AppShell';
 import { useAuth } from '../state/auth';
@@ -13,6 +14,12 @@ const DEMO_ACCOUNTS = [
   { email: 'admin@cardiosense.dev', role: 'Org admin' },
   { email: 'tech@cardiosense.dev', role: 'Technician' },
   { email: 'patient@cardiosense.dev', role: 'Patient' },
+];
+
+const POINTS = [
+  'Live ECG with beat labels and rhythm rules',
+  'Risk tiers with evidence — never colour alone',
+  'AI insight grounded in the patient record',
 ];
 
 /** The API "asks for" an OTP by rejecting the login with a message (or flag) that mentions it. */
@@ -64,62 +71,89 @@ export function SignInPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <main className="flex flex-1 items-center justify-center px-4 py-10">
-        <div className="w-full max-w-sm">
-          <div className="mb-5 flex items-center gap-2">
-            <svg width="30" height="22" viewBox="0 0 22 16" aria-hidden="true">
-              <path d="M0 9h5l2-3 2.5 8 3-13 2.5 10 1.5-2H22" fill="none" stroke="#00A896" strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round" />
-            </svg>
-            <div>
-              <h1 className="leading-tight">CardioSense AI</h1>
-              <p className="text-xs text-fg-muted">ECG rhythm monitoring console</p>
-            </div>
-            <span className="ml-auto"><MockBadge /></span>
+      <main className="auth-shell flex-1">
+        <section className="auth-brand hidden lg:flex">
+          <div>
+            <BrandLogo size="lg" withWordmark onDark className="mb-10" />
+            <p className="eyebrow mb-4">AI healthcare · clinician console</p>
+            <h1 className="max-w-md text-4xl font-extrabold leading-tight tracking-tight text-white">
+              See every beat.<br />
+              <span className="gradient-text">Act on evidence.</span>
+            </h1>
+            <p className="mt-4 max-w-sm text-sm text-[#b7c9db]">
+              Stream, classify, and escalate with Rhythmiq — navy foundation, medical green, cyan AI clarity.
+            </p>
+            <ul className="mt-10 space-y-3">
+              {POINTS.map((item) => (
+                <li key={item} className="flex items-start gap-3 text-sm text-[#d8e6f4]">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[rgba(0,184,107,0.2)] text-[var(--rq-green-bright)]" aria-hidden="true">
+                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                      <path d="M2.5 6.2L4.8 8.5L9.5 3.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </span>
+                  {item}
+                </li>
+              ))}
+            </ul>
           </div>
+          <p className="text-xs text-[#8aa0b8]">Research and demonstration system — not a medical device.</p>
+        </section>
 
-          <form onSubmit={submit} className="panel space-y-3 p-4" aria-label="Sign in">
-            <h2 className="text-base">Sign in</h2>
-            {error && <Banner tone="critical" title="Sign-in failed.">{error}</Banner>}
-            <Field label="Email">
-              {(id) => <input id={id} className="input" type="email" autoComplete="username" required autoFocus value={email} onChange={(e) => setEmail(e.target.value)} />}
-            </Field>
-            <Field label="Password">
-              {(id) => <input id={id} className="input" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />}
-            </Field>
-            {needOtp && (
-              <Field label="One-time code" hint="Enter the 6-digit code from your authenticator app.">
-                {(id, desc) => (
-                  <input id={id} aria-describedby={desc} className="input num tracking-[0.3em]" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}"
-                    maxLength={6} required autoFocus value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))} />
-                )}
+        <section className="auth-form">
+          <div className="mx-auto w-full max-w-md">
+            <div className="mb-6 flex items-center gap-2 lg:hidden">
+              <BrandLogo size="sm" withWordmark />
+              <MockBadge />
+            </div>
+            <div className="mb-2 flex items-center gap-3">
+              <Link to="/" className="text-xs font-semibold text-teal-text hover:underline">← Rhythmiq home</Link>
+              <span className="hidden lg:inline"><MockBadge /></span>
+            </div>
+            <h2 className="text-2xl font-extrabold tracking-tight text-navy">Welcome back</h2>
+            <p className="mt-1 text-sm text-fg-muted">Sign in to the Rhythmiq monitoring console.</p>
+
+            <form onSubmit={submit} className="panel mt-6 space-y-3 p-5" aria-label="Sign in">
+              {error && <Banner tone="critical" title="Sign-in failed.">{error}</Banner>}
+              <Field label="Email">
+                {(id) => <input id={id} className="input" type="email" autoComplete="username" required autoFocus value={email} onChange={(e) => setEmail(e.target.value)} />}
               </Field>
-            )}
-            <Button type="submit" variant="primary" busy={busy} className="w-full">{needOtp ? 'Verify and sign in' : 'Sign in'}</Button>
-          </form>
+              <Field label="Password">
+                {(id) => <input id={id} className="input" type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />}
+              </Field>
+              {needOtp && (
+                <Field label="One-time code" hint="Enter the 6-digit code from your authenticator app.">
+                  {(id, desc) => (
+                    <input id={id} aria-describedby={desc} className="input num tracking-[0.3em]" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}"
+                      maxLength={6} required autoFocus value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))} />
+                  )}
+                </Field>
+              )}
+              <Button type="submit" variant="primary" busy={busy} className="w-full">{needOtp ? 'Verify and sign in' : 'Sign in'}</Button>
+            </form>
 
-          {showDemo && (
-            <section className="mt-4 rounded-md border border-dashed border-line p-3" aria-label="Demo accounts">
-              <h2 className="text-xs text-fg-muted">Demo accounts (development seed) — password <span className="font-mono text-fg">{DEMO_PASSWORD}</span></h2>
-              <ul className="mt-2 grid grid-cols-1 gap-1">
-                {DEMO_ACCOUNTS.map((a) => (
-                  <li key={a.email}>
-                    <button
-                      type="button"
-                      onClick={() => { setEmail(a.email); setPassword(DEMO_PASSWORD); setNeedOtp(false); setOtp(''); setError(null); }}
-                      className="flex w-full items-center justify-between rounded px-2 py-1 text-left text-xs hover:bg-ink-700"
-                    >
-                      <span className="font-mono text-fg">{a.email}</span>
-                      <span className="text-fg-muted">{a.role}</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-              <p className="mt-2 text-2xs text-fg-faint">Selecting an account fills the form; press Sign in to continue.</p>
-            </section>
-          )}
-        </div>
+            {showDemo && (
+              <section className="panel mt-4 p-3" aria-label="Demo accounts">
+                <h2 className="text-xs text-fg-muted">Demo accounts — password <span className="num text-fg">{DEMO_PASSWORD}</span></h2>
+                <ul className="mt-2 grid grid-cols-1 gap-1">
+                  {DEMO_ACCOUNTS.map((a) => (
+                    <li key={a.email}>
+                      <button
+                        type="button"
+                        onClick={() => { setEmail(a.email); setPassword(DEMO_PASSWORD); setNeedOtp(false); setOtp(''); setError(null); }}
+                        className="flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left text-xs hover:bg-ink-800"
+                      >
+                        <span className="num text-fg">{a.email}</span>
+                        <span className="text-fg-muted">{a.role}</span>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+          </div>
+        </section>
       </main>
-      <Disclaimer />
+      <Disclaimer className="lg:hidden" />
     </div>
   );
 }
