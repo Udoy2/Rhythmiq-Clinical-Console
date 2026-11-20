@@ -129,6 +129,9 @@ export function LandingPage() {
             ))}
           </nav>
           <div className="landing-nav-actions">
+            <Link to="/pitch" className="btn-secondary landing-nav-cta">
+              Pitch deck
+            </Link>
             <Link to="/login" className="btn-secondary landing-nav-cta">
               Sign in
             </Link>
@@ -154,6 +157,9 @@ export function LandingPage() {
               <a key={item.href} href={item.href} onClick={() => setMenuOpen(false)}>{item.label}</a>
             ))}
           </nav>
+          <Link to="/pitch" className="btn-secondary landing-nav-drawer-cta" onClick={() => setMenuOpen(false)}>
+            Pitch deck
+          </Link>
           <Link to="/login" className="btn-secondary landing-nav-drawer-cta" onClick={() => setMenuOpen(false)}>
             Sign in
           </Link>

@@ -103,6 +103,7 @@ export function SignInPage() {
             </div>
             <div className="mb-2 flex items-center gap-3">
               <Link to="/" className="text-xs font-semibold text-accent-text hover:underline">← Rhythmiq home</Link>
+              <Link to="/pitch" className="text-xs font-semibold text-accent-text hover:underline">Pitch deck →</Link>
               <span className="hidden lg:inline"><MockBadge /></span>
             </div>
             <h1 className="text-2xl font-extrabold tracking-tight text-ink">Welcome back</h1>
