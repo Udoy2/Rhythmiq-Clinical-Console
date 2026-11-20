@@ -36,7 +36,7 @@ export default function AlertsPage() {
               <label htmlFor="f-tier" className="label mr-1.5">Tier</label>
               <Select id="f-tier" className="!w-44" value={tier} onChange={(e) => setTier(e.target.value as Tier | '')}>
                 <option value="">All tiers</option>
-                {[...TIERS].reverse().map((t) => <option key={t} value={t}>{TIER_STYLE[t].name} — {TIER_STYLE[t].meaning}</option>)}
+                {[...TIERS].reverse().map((t) => <option key={t} value={t}>{TIER_STYLE[t].meaning}</option>)}
               </Select>
             </div>
           </>
@@ -53,7 +53,7 @@ export default function AlertsPage() {
               </thead>
               <tbody>
                 {sortAlerts(list).map((a) => (
-                  <tr key={a.id} className="cursor-pointer hover:bg-ink-800" onClick={() => nav(`/alerts/${a.id}`)}
+                  <tr key={a.id} className="cursor-pointer hover:bg-paper-sunk" onClick={() => nav(`/alerts/${a.id}`)}
                     style={{ boxShadow: `inset 3px 0 0 ${(TIER_STYLE[a.tier] ?? TIER_STYLE.amber).color}` }}>
                     <td><TierBadge tier={a.tier} /></td>
                     <td className="max-w-[26rem]">
@@ -67,7 +67,7 @@ export default function AlertsPage() {
                       {a.acknowledged_by && <div className="text-xs text-fg-muted">by {a.acknowledged_by}</div>}
                     </td>
                     <td><Mono>{a.rule_id}</Mono></td>
-                    <td className="text-right"><Link to={`/alerts/${a.id}`} className="text-xs font-medium text-teal-text hover:underline" onClick={(e) => e.stopPropagation()}>Evidence<span className="sr-only"> for {a.title}</span></Link></td>
+                    <td className="text-right"><Link to={`/alerts/${a.id}`} className="text-xs font-medium text-accent-text hover:underline" onClick={(e) => e.stopPropagation()}>Evidence<span className="sr-only"> for {a.title}</span></Link></td>
                   </tr>
                 ))}
               </tbody>

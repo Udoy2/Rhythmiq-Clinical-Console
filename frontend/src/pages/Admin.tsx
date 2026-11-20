@@ -5,7 +5,7 @@ import { errorText } from '../api/client';
 import { api, qk } from '../api/endpoints';
 import { auditActor, auditTarget, auditTime } from '../api/normalize';
 import { ROLES, type Device, type PairResponse, type Role } from '../api/types';
-import { Badge, Banner, Button, Card, EmptyState, Field, Mono, PageHeader, QueryState, Select } from '../components/ui';
+import { Badge, Banner, Button, Card, Dialog, EmptyState, Field, Mono, PageHeader, QueryState, Select } from '../components/ui';
 import { cx, fmtAgo, fmtDateTimeS, humanKey } from '../lib/format';
 import { isAdmin, ROLE_LABEL, useAuth } from '../state/auth';
 import { toast } from '../state/toasts';
@@ -24,9 +24,9 @@ export default function AdminPage() {
   return (
     <div>
       <PageHeader title={admin ? 'Admin' : 'Devices'} sub={admin ? 'Users, devices, alert rules and the audit trail. Changes are versioned and audited.' : 'Pair and check devices.'} />
-      <nav aria-label="Admin sections" className="mb-3 flex gap-1 overflow-x-auto border-b border-line">
+      <nav aria-label="Admin sections" className="mb-3 flex gap-1 overflow-x-auto overflow-y-hidden border-b border-line">
         {tabs.map((t) => (
-          <NavLink key={t.id} to={`/admin/${t.id}`} className={() => cx('-mb-px whitespace-nowrap border-b-2 px-3 py-1.5 text-sm', t.id === tab ? 'border-teal font-semibold text-fg' : 'border-transparent text-fg-muted hover:text-fg')}
+          <NavLink key={t.id} to={`/admin/${t.id}`} className={() => cx('-mb-px whitespace-nowrap border-b-2 px-3 py-1.5 text-sm', t.id === tab ? 'border-accent font-semibold text-fg' : 'border-transparent text-fg-muted hover:text-fg')}
             aria-current={t.id === tab ? 'page' : undefined}>
             {t.label}
           </NavLink>
@@ -45,6 +45,7 @@ function UsersTab() {
   const me = useAuth((s) => s.user);
   const qc = useQueryClient();
   const q = useQuery({ queryKey: qk.users, queryFn: api.users });
+  const [confirm, setConfirm] = useState<{ id: string; email: string } | null>(null);
   const m = useMutation({
     mutationFn: (v: { id: string; role?: Role; active?: boolean }) => api.updateUser(v.id, { role: v.role, active: v.active }),
     onSuccess: (u) => { void qc.invalidateQueries({ queryKey: qk.users }); toast.ok('User updated', `${u.email} — ${ROLE_LABEL[u.role] ?? u.role}`); },
@@ -52,6 +53,17 @@ function UsersTab() {
   });
   return (
     <Card title="Users & roles" bodyClass="p-0">
+      <Dialog
+        open={!!confirm}
+        onClose={() => setConfirm(null)}
+        title="Disable this user?"
+        footer={<>
+          <Button data-autofocus onClick={() => setConfirm(null)}>Cancel</Button>
+          <Button variant="danger" onClick={() => { if (confirm) m.mutate({ id: confirm.id, active: false }); setConfirm(null); }}>Disable user</Button>
+        </>}
+      >
+        <p className="text-sm"><span className="font-medium">{confirm?.email}</span> will not be able to sign in until an admin enables the account again.</p>
+      </Dialog>
       <QueryState query={q} empty={<EmptyState title="No users" />}>
         {(list) => (
           <div className="overflow-x-auto">
@@ -70,11 +82,11 @@ function UsersTab() {
                           {ROLES.map((r) => <option key={r} value={r}>{ROLE_LABEL[r]}</option>)}
                         </Select>
                       </td>
-                      <td>{u.mfa_enabled ? <span className="text-teal-text">Enabled</span> : <span className="text-fg-muted">Not enrolled</span>}</td>
+                      <td>{u.mfa_enabled ? <span className="text-accent-text">Enabled</span> : <span className="text-fg-muted">Not enrolled</span>}</td>
                       <td>{u.active === false ? <span className="text-amber-text">Disabled</span> : <span className="text-fg">Active</span>}</td>
                       <td className="text-right">
                         {u.active !== undefined && !self && (
-                          <Button size="sm" disabled={m.isPending} onClick={() => m.mutate({ id: u.id, active: !u.active })}>{u.active ? 'Disable' : 'Enable'}</Button>
+                          <Button size="sm" disabled={m.isPending} onClick={() => (u.active ? setConfirm({ id: u.id, email: u.email }) : m.mutate({ id: u.id, active: true }))}>{u.active ? 'Disable' : 'Enable'}</Button>
                         )}
                       </td>
                     </tr>
@@ -97,7 +109,7 @@ function Countdown({ until }: { until: string }) {
   if (!Number.isFinite(left)) return null;
   return left > 0
     ? <span className="num text-fg-muted">expires in {Math.floor(left / 60)}:{String(left % 60).padStart(2, '0')}</span>
-    : <span className="font-semibold text-coral-text">expired — create a new code</span>;
+    : <span className="font-semibold text-alert-text">expired — create a new code</span>;
 }
 
 function DevicesTab() {
@@ -167,7 +179,7 @@ function DevicesTab() {
             <Button type="submit" variant="primary" busy={create.isPending}>Create pairing code</Button>
           </form>
           {issued && (
-            <div className="mt-3 rounded border border-teal/50 bg-teal-dim/30 p-3" role="status">
+            <div className="mt-3 rounded border border-accent/50 bg-accent-dim/30 p-3" role="status">
               <div className="label">Pairing code for <Mono className="text-fg">{issued.device_id}</Mono></div>
               {issued.pairing_code
                 ? <div className="num mt-1 text-3xl font-semibold tracking-[0.25em] text-fg">{issued.pairing_code}</div>
@@ -267,7 +279,7 @@ function RulesTab() {
                         <option value="true">on</option><option value="false">off</option>
                       </Select>
                     ) : (
-                      <input id={`rule-${path}`} className={cx('input num !w-28 text-right', changed && 'border-teal', bad && '!border-coral')} disabled={!editable}
+                      <input id={`rule-${path}`} className={cx('input num !w-28 text-right', changed && 'border-accent', bad && '!border-alert')} disabled={!editable}
                         inputMode={typeof value === 'number' ? 'decimal' : undefined} aria-invalid={bad || undefined}
                         value={editable ? cur : JSON.stringify(value)} onChange={(e) => setDraft({ ...draft, [path]: e.target.value })} />
                     )}
@@ -275,7 +287,7 @@ function RulesTab() {
                 );
               })}
             </div>
-            {invalid.length > 0 && <p role="alert" className="mt-2 text-xs text-coral-text">Enter a number for: {invalid.join(', ')}</p>}
+            {invalid.length > 0 && <p role="alert" className="mt-2 text-xs text-alert-text">Enter a number for: {invalid.join(', ')}</p>}
             {save.isError && <div className="mt-3"><Banner tone="critical" title="Could not save the thresholds.">{errorText(save.error)}</Banner></div>}
             <div className="mt-3 flex items-center gap-2">
               <Button type="submit" variant="primary" busy={save.isPending} disabled={dirty.length === 0 || invalid.length > 0}>Save as new version</Button>
@@ -311,7 +323,7 @@ function AuditTab() {
         {(list) => (
           <div className="max-h-[60vh] overflow-auto">
             <table>
-              <thead className="sticky top-0 bg-ink-900"><tr><th scope="col">Time</th><th scope="col">Actor</th><th scope="col">Action</th><th scope="col">Target</th><th scope="col">Detail</th></tr></thead>
+              <thead className="sticky top-0 bg-paper-raised"><tr><th scope="col">Time</th><th scope="col">Actor</th><th scope="col">Action</th><th scope="col">Target</th><th scope="col">Detail</th></tr></thead>
               <tbody>
                 {list.map((a) => (
                   <tr key={a.id}>

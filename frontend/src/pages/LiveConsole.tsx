@@ -4,14 +4,15 @@ import { useStore } from 'zustand';
 import { api, qk } from '../api/endpoints';
 import { BeatRibbon } from '../components/ecg/BeatRibbon';
 import { EcgCanvas } from '../components/ecg/EcgCanvas';
-import { EcgToolbar, type EcgViewSettings } from '../components/ecg/EcgToolbar';
+import { BackIcon, EcgToolbar, ForwardIcon, IconTipButton, type EcgViewSettings } from '../components/ecg/EcgToolbar';
 import { RiskGauge } from '../components/ecg/RiskGauge';
 import { AlertsPanel } from '../components/live/AlertsPanel';
 import { DemoControls } from '../components/live/DemoControls';
 import { InsightPanel } from '../components/live/InsightPanel';
 import { LiveBanners } from '../components/live/LiveBanners';
-import { RhythmCard, VitalsStrip } from '../components/live/RhythmCard';
-import { Badge, BeatLegend, Button, Card } from '../components/ui';
+import { RhythmSection, VitalsDetail } from '../components/live/RhythmCard';
+import { StateStrip } from '../components/live/StateStrip';
+import { Badge, BeatLegend, Button, Card, SideSection } from '../components/ui';
 import { agreementStats } from '../live/beatMatch';
 import type { LiveFeed } from '../live/liveFeed';
 import { alertsSuppressed } from '../live/liveReducer';
@@ -138,15 +139,18 @@ export function LiveConsolePage() {
     }
   }, [s.toastQueue, s.alerts, feed, pushToast]);
 
+  const [detailsOpen, setDetailsOpen] = useState(false);
   const session = s.session;
   const isReplay = session?.source === 'replay';
   const suppressed = alertsSuppressed(s.quality.state);
   const risk = s.window?.risk ?? null;
   const patientAlerts = s.alerts.filter((a) => a.patient_id === patient.id);
+  const openAlerts = patientAlerts.filter((a) => a.state !== 'closed').length;
 
   return (
     <div>
       <LiveBanners s={s} />
+      <StateStrip risk={risk} hr={s.window?.hr_bpm} openAlerts={openAlerts} stale={s.conn !== 'open' || suppressed} />
       <div className="grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="min-w-0 space-y-3">
           <Card
@@ -155,7 +159,7 @@ export function LiveConsolePage() {
                 <h2>ECG</h2>
                 {session && <span className="num text-xs text-fg-muted">{session.fs} Hz · {session.device_id}</span>}
                 {isReplay && session && <Badge tone="amber" className="!text-xs" title="Replayed public recording — not a real patient stream">{replayBadgeText(session)}</Badge>}
-                {session && !isReplay && session.active && <Badge tone="teal">LIVE DEVICE</Badge>}
+                {session && !isReplay && session.active && <Badge tone="ok">LIVE DEVICE</Badge>}
               </div>
             }
             right={<ConnBadge conn={s.conn} active={!!session?.active} />}
@@ -167,8 +171,8 @@ export function LiveConsolePage() {
               left={
                 <div className="flex items-center gap-1.5">
                   <Button size="sm" onClick={togglePause} aria-pressed={paused} className="w-[4.5rem]">{paused ? 'Resume' : 'Pause'}</Button>
-                  <Button size="sm" onClick={() => onPan(windowS.current / 2)} aria-label="Scroll back">◀</Button>
-                  <Button size="sm" onClick={() => onPan(-windowS.current / 2)} disabled={!paused} aria-label="Scroll forward">▶</Button>
+                  <IconTipButton label="Scroll back" onClick={() => onPan(windowS.current / 2)}><BackIcon /></IconTipButton>
+                  <IconTipButton label="Scroll forward" onClick={() => onPan(-windowS.current / 2)} disabled={!paused}><ForwardIcon /></IconTipButton>
                   <Button size="sm" variant={paused ? 'primary' : 'secondary'} onClick={resume} disabled={!paused}>Go live</Button>
                 </div>
               }
@@ -197,37 +201,45 @@ export function LiveConsolePage() {
             </div>
             {!session?.active && s.conn === 'open' && (
               <p className="mt-3 rounded border border-dashed border-line px-3 py-2 text-sm text-fg-muted">
-                No active stream for this patient. {canRunDemo(role) ? 'Start a demo replay in the side panel, or connect the paired device.' : 'The waveform appears when the paired device starts streaming.'}
+                No active stream for this patient. {canRunDemo(role)
+                  ? <><button type="button" className="font-semibold text-accent-text underline" onClick={() => setDetailsOpen(true)}>Open demo controls</button> to start a replay, or connect the paired device.</>
+                  : 'The waveform appears when the paired device starts streaming.'}
               </p>
             )}
           </Card>
 
-          <VitalsStrip window={s.window} />
-          {canUseCopilot(role) && <InsightPanel patientId={patient.id} />}
         </div>
 
-        <div className="grid min-w-0 grid-cols-1 content-start gap-3 md:grid-cols-2 xl:grid-cols-1">
-          {canRunDemo(role) && (
-            <DemoControls
-              patientId={patient.id}
-              isDemoPatient={patient.is_demo}
-              session={session}
-              stream={s.stream}
-            />
-          )}
-          <RhythmCard window={s.window} session={session} suppressed={suppressed} />
-          <Card title="Risk" right={<span className="text-2xs text-fg-faint">from the rules engine, every 10 s</span>}>
+        <aside aria-label="Rhythm, risk and alerts" className="panel min-w-0 divide-y divide-line self-start !shadow-none">
+          <RhythmSection window={s.window} suppressed={suppressed} />
+          <SideSection title="Risk" right={<span className="text-xs text-fg-faint">from the rules engine, every 10 s</span>}>
             <RiskGauge risk={risk} />
-          </Card>
+          </SideSection>
           <AlertsPanel alerts={patientAlerts} canAct={canActOnAlerts(role)} onUpdated={(a) => feed.upsertAlert(a)} loading={backlog.isPending} error={backlog.error} />
-        </div>
+          {canUseCopilot(role) && <InsightPanel patientId={patient.id} />}
+          <details className="group px-4 py-3" open={detailsOpen} onToggle={(e) => setDetailsOpen(e.currentTarget.open)}>
+            <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-bold tracking-tight [&::-webkit-details-marker]:hidden">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="transition-transform group-open:rotate-90"><path d="m6 3 5 5-5 5" /></svg>
+              More detail
+              <span className="text-xs font-normal text-fg-muted">HRV, burdens, versions{canRunDemo(role) ? ', demo controls' : ''}</span>
+            </summary>
+            <div className="mt-3 space-y-4">
+              <VitalsDetail window={s.window} session={session} />
+              {canRunDemo(role) && (
+                <div className="border-t border-line pt-3">
+                  <DemoControls patientId={patient.id} isDemoPatient={patient.is_demo} session={session} stream={s.stream} />
+                </div>
+              )}
+            </div>
+          </details>
+        </aside>
       </div>
     </div>
   );
 }
 
 function ConnBadge({ conn, active }: { conn: string; active: boolean }) {
-  if (conn === 'open') return <Badge tone={active ? 'teal' : 'outline'}>{active ? 'CONNECTED' : 'CONNECTED — NO STREAM'}</Badge>;
+  if (conn === 'open') return <Badge tone={active ? 'ok' : 'outline'}>{active ? 'CONNECTED' : 'CONNECTED — NO STREAM'}</Badge>;
   if (conn === 'reconnecting') return <Badge tone="amber">RECONNECTING</Badge>;
   if (conn === 'connecting') return <Badge tone="outline">CONNECTING</Badge>;
   return <Badge tone="outline">DISCONNECTED</Badge>;

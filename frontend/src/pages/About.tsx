@@ -157,7 +157,7 @@ export default function AboutPage() {
               <EmptyState title="The service did not report limitations">Treat every label as unverified.</EmptyState>
             )}
             <ul className="mt-3 list-disc space-y-1 border-t border-line pt-3 pl-4 text-xs text-fg-muted">
-              <li>F and Unknown beats never raise an alert on their own; S-only findings never go above Amber.</li>
+              <li>F and Unknown beats never raise an alert on their own; S-only findings never go above Watch.</li>
               <li>An irregular rhythm is flagged as “Irregular rhythm — review”; the system does not name a rhythm disorder.</li>
               <li>Low signal quality or lead-off suppresses clinical alerts.</li>
             </ul>

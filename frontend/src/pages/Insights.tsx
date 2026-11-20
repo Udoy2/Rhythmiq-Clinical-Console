@@ -41,7 +41,7 @@ export default function InsightsPage() {
             </div>
             <div className="flex flex-wrap gap-1.5">
               {SUGGESTIONS.map((s) => (
-                <button key={s} type="button" onClick={() => setQuestion(s)} className="rounded border border-line px-2 py-0.5 text-xs text-fg-muted hover:border-teal hover:text-fg">{s}</button>
+                <button key={s} type="button" onClick={() => setQuestion(s)} className="rounded border border-line px-2 py-0.5 text-xs text-fg-muted hover:border-accent hover:text-fg">{s}</button>
               ))}
             </div>
           </form>

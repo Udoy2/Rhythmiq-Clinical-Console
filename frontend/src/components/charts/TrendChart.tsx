@@ -23,7 +23,7 @@ interface Props {
 }
 
 const M = { l: 44, r: 12, t: 8, b: 20 };
-const INK = '#10243E', MUTED = '#64748B', FAINT = '#94a3b8', GRID = 'rgba(0,184,107,0.14)', PAPER = '#FFFFFF', GAP = '#d97706';
+const INK = '#17130F', MUTED = '#6A6158', FAINT = '#8A8176', GRID = 'rgba(200,110,120,0.22)', PAPER = '#FFFDF8', GAP = '#C26A04';
 
 function niceStep(span: number, target: number): number {
   const raw = span / Math.max(1, target);
@@ -144,7 +144,7 @@ export function TrendChart({
       </figcaption>
       <div
         ref={wrap}
-        className="relative rounded-sm border border-line bg-white focus-visible:outline-2"
+        className="relative rounded-sm border border-line bg-paper-raised focus-visible:outline-2"
         tabIndex={0}
         role="group"
         aria-label={`${title} trend chart. Use left and right arrow keys to read values.`}
@@ -157,7 +157,7 @@ export function TrendChart({
           <svg width={w} height={height} role="img" aria-label={`${title} over time`} className="block">
             <defs>
               <pattern id={patId} width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-                <line x1="0" y1="0" x2="0" y2="7" stroke="rgba(201,130,10,0.5)" strokeWidth="1.5" />
+                <line x1="0" y1="0" x2="0" y2="7" stroke="rgba(194,106,4,0.5)" strokeWidth="1.5" />
               </pattern>
             </defs>
             {geo.ticks.map((v) => (
@@ -175,7 +175,7 @@ export function TrendChart({
               if (b - a < 1) return null;
               return (
                 <g key={i}>
-                  <rect x={a} y={M.t} width={b - a} height={geo.ph} fill="rgba(201,130,10,0.05)" />
+                  <rect x={a} y={M.t} width={b - a} height={geo.ph} fill="rgba(194,106,4,0.05)" />
                   <rect x={a} y={M.t} width={b - a} height={geo.ph} fill={`url(#${patId})`} opacity="0.28" />
                   {/* Label only wide gaps so sparse demo sessions stay readable */}
                   {b - a > 96 && <text x={(a + b) / 2} y={M.t + 12} textAnchor="middle" fontSize="10" fill={GAP} opacity="0.85">no data</text>}
@@ -208,7 +208,7 @@ export function TrendChart({
           </svg>
         )}
         {hp && (
-          <div className="pointer-events-none absolute top-1 z-10 w-[168px] rounded border border-line bg-white px-2 py-1.5 text-xs shadow-md" style={{ left: tipLeft }} role="status">
+          <div className="pointer-events-none absolute top-1 z-10 w-[168px] rounded border border-line bg-paper-raised px-2 py-1.5 text-xs shadow-md" style={{ left: tipLeft }} role="status">
             <div className="num text-fg-muted">{formatTime(hp.t)}</div>
             {series.map((s) => {
               const v = hp.values[s.key];
