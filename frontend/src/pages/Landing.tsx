@@ -5,8 +5,7 @@ import { EcgStrip } from '../components/landing/EcgStrip';
 import { useAuth } from '../state/auth';
 import { DISCLAIMER } from '../api/types';
 import { cx } from '../lib/format';
-
-const DEMO_PASSWORD = 'CardioSense!23';
+import { DEMO_ACCOUNTS, DEMO_PASSWORD, SHOW_DEMO } from '../lib/demo';
 
 const NAV = [
   { href: '#services', label: 'Capabilities' },
@@ -70,13 +69,6 @@ const STEPS = [
   { title: 'Open a replay', body: 'Choose a DEMO patient and start the labelled MIT-BIH stream in Live console.' },
   { title: 'Watch the loop', body: 'Follow beat labels, risk findings, and alerts as the strip advances.' },
   { title: 'Ask with context', body: 'Use Insights to ask what changed — answers stay tied to retrieved evidence.' },
-];
-
-const DEMO_ACCOUNTS = [
-  { email: 'clinician@cardiosense.dev', role: 'Clinician', use: 'Live console, alerts, insights' },
-  { email: 'admin@cardiosense.dev', role: 'Org admin', use: 'Users, devices, audit' },
-  { email: 'tech@cardiosense.dev', role: 'Technician', use: 'Device pairing and signal health' },
-  { email: 'patient@cardiosense.dev', role: 'Patient', use: 'Limited patient-facing view' },
 ];
 
 const DEMO_PATIENTS = [
@@ -275,7 +267,8 @@ export function LandingPage() {
                     <h3>Sign in</h3>
                   </div>
                 </div>
-                <p>Use any demo account with password <span className="landing-mono">{DEMO_PASSWORD}</span>.</p>
+                {!SHOW_DEMO && <p>Sign in with the account your administrator gave you.</p>}
+                {SHOW_DEMO && <p>Use any demo account with password <span className="landing-mono">{DEMO_PASSWORD}</span>.</p>}
                 <ul className="landing-account-list">
                   {DEMO_ACCOUNTS.map((a) => (
                     <li key={a.email}>

@@ -2,20 +2,13 @@ import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { ApiError, errorText } from '../api/client';
 import { api } from '../api/endpoints';
-import { transport } from '../api/transport';
 import { BrandLogo } from '../components/BrandLogo';
 import { EcgStrip } from '../components/landing/EcgStrip';
 import { Banner, Button, Field } from '../components/ui';
 import { Disclaimer, MockBadge } from '../layout/AppShell';
 import { useAuth } from '../state/auth';
-
-const DEMO_PASSWORD = 'CardioSense!23';
-const DEMO_ACCOUNTS = [
-  { email: 'clinician@cardiosense.dev', role: 'Clinician' },
-  { email: 'admin@cardiosense.dev', role: 'Org admin' },
-  { email: 'tech@cardiosense.dev', role: 'Technician' },
-  { email: 'patient@cardiosense.dev', role: 'Patient' },
-];
+import { DEMO_ACCOUNTS, DEMO_PASSWORD, SHOW_DEMO } from '../lib/demo';
+import { safeRedirect } from '../lib/safeRedirect';
 
 const POINTS = [
   'Live ECG with beat labels and rhythm rules',
@@ -36,7 +29,7 @@ export function SignInPage() {
   const setSession = useAuth((s) => s.setSession);
   const nav = useNavigate();
   const loc = useLocation();
-  const from = (loc.state as { from?: string } | null)?.from ?? '/patients';
+  const from = safeRedirect((loc.state as { from?: string } | null)?.from);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -68,7 +61,7 @@ export function SignInPage() {
     }
   };
 
-  const showDemo = import.meta.env.DEV || transport.isMock;
+  const showDemo = SHOW_DEMO;
 
   return (
     <div className="flex min-h-screen flex-col">
