@@ -99,6 +99,8 @@
     @apply px-3 py-2 align-middle;
     border-bottom: 1px solid var(--rq-border);
   }
+  /* Scroll containers must be a containing block, or absolutely-positioned children (sr-only labels) widen the page. */
+  .overflow-x-auto, .overflow-auto { position: relative; }
   ::selection { background: rgba(0, 184, 107, 0.22); }
   * { scrollbar-color: rgba(11, 31, 58, 0.25) transparent; scrollbar-width: thin; }
   button, a, [role='button'] { cursor: pointer; }
@@ -130,7 +132,7 @@
     box-shadow: var(--rq-shadow);
   }
   .panel-head {
-    @apply flex items-center justify-between gap-2 px-4 py-3;
+    @apply flex flex-wrap items-center justify-between gap-2 px-4 py-3;
     border-bottom: 1px solid var(--rq-border);
   }
   .panel-head h2 {

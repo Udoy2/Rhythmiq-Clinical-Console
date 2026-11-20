@@ -277,7 +277,7 @@ function RulesTab() {
             </div>
             {invalid.length > 0 && <p role="alert" className="mt-2 text-xs text-coral-text">Enter a number for: {invalid.join(', ')}</p>}
             {save.isError && <div className="mt-3"><Banner tone="critical" title="Could not save the thresholds.">{errorText(save.error)}</Banner></div>}
-            <div className="mt-3 flex items-center gap-2">
+            <div className="mt-3 flex flex-wrap items-center gap-2">
               <Button type="submit" variant="primary" busy={save.isPending} disabled={dirty.length === 0 || invalid.length > 0}>Save as new version</Button>
               <Button onClick={() => setDraft({})} disabled={dirty.length === 0}>Discard changes</Button>
               <span className="text-xs text-fg-muted">{dirty.length ? `${dirty.length} unsaved change${dirty.length === 1 ? '' : 's'}` : 'No changes'}</span>

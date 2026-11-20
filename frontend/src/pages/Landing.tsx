@@ -171,6 +171,9 @@ export function LandingPage() {
             ))}
           </nav>
           <div className="landing-nav-actions">
+            <span className="hidden md:inline-flex">
+              <Link to="/pitch" className="landing-btn-ghost landing-nav-cta">Pitch deck</Link>
+            </span>
             <Link to="/login" className="landing-btn-ghost landing-nav-cta">
               Sign in
             </Link>
@@ -196,6 +199,9 @@ export function LandingPage() {
               <a key={item.href} href={item.href} onClick={() => setMenuOpen(false)}>{item.label}</a>
             ))}
           </nav>
+          <Link to="/pitch" className="landing-btn-ghost landing-nav-drawer-cta" onClick={() => setMenuOpen(false)}>
+            Pitch deck
+          </Link>
           <Link to="/login" className="landing-btn-ghost landing-nav-drawer-cta" onClick={() => setMenuOpen(false)}>
             Sign in
           </Link>

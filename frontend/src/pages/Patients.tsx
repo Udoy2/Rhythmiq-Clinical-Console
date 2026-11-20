@@ -7,7 +7,7 @@ import { lastEventText } from '../api/normalize';
 import type { Patient, PatientCreate, Tier } from '../api/types';
 import { SignalStatusBadge } from '../components/SignalStatus';
 import { Banner, Button, DemoBadge, Dialog, EmptyState, ErrorState, Field, PageHeader, Select, Skeleton, TierBadge } from '../components/ui';
-import { ageFromDob, fmtAgo } from '../lib/format';
+import { ageFromDob, cx, fmtAgo } from '../lib/format';
 import { canManagePatients, useAuth } from '../state/auth';
 import { toast } from '../state/toasts';
 
@@ -34,6 +34,8 @@ export function PatientsPage() {
     return term ? all.filter((p) => p.name.toLowerCase().includes(term) || (p.mrn ?? '').toLowerCase().includes(term)) : all;
   }, [q.data, term]);
 
+  const hasRows = !q.isPending && !q.isError && rows.length > 0;
+
   return (
     <div>
       <PageHeader
@@ -42,13 +44,13 @@ export function PatientsPage() {
         right={
           <>
             <label className="sr-only" htmlFor="patient-search">Search patients by name or MRN</label>
-            <input id="patient-search" type="search" className="input w-full min-w-0 max-w-xs sm:w-64" placeholder="Search name or MRN" value={search} onChange={(e) => setSearch(e.target.value)} />
+            <input id="patient-search" type="search" className="input w-full min-w-0 sm:w-64 sm:max-w-xs" placeholder="Search name or MRN" value={search} onChange={(e) => setSearch(e.target.value)} />
             {canManagePatients(role) && <Button variant="primary" onClick={() => setCreating(true)}>New patient</Button>}
           </>
         }
       />
 
-      <div className="panel overflow-x-auto">
+      <div className={cx('panel overflow-x-auto', hasRows && 'hidden sm:block')}>
         {q.isPending ? (
           <div className="space-y-2 p-3" aria-busy="true" aria-label="Loading patients">
             {Array.from({ length: 5 }, (_, i) => <Skeleton key={i} className="h-9 w-full" />)}
@@ -115,6 +117,44 @@ export function PatientsPage() {
           </table>
         )}
       </div>
+      {hasRows && (
+        <ul className="space-y-2 sm:hidden" aria-label="Patients sorted by risk">
+          {rows.map((p) => {
+            const ev = lastEventText(p.last_event);
+            const age = ageFromDob(p.dob);
+            return (
+              <li key={p.id}>
+                <Link to={`/patients/${p.id}/live`} className="panel block p-3 active:bg-ink-800" aria-label={`Open live console for ${p.name}`}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <span className="font-medium text-fg">{p.name}</span>
+                        {p.is_demo && <DemoBadge />}
+                        {!p.consent && <span className="rounded border border-amber/60 px-1 text-2xs font-semibold text-amber-text">NO CONSENT</span>}
+                      </div>
+                      <div className="text-xs text-fg-muted">
+                        {[p.mrn ? `MRN ${p.mrn}` : null, age !== null ? `${age} y` : null, p.sex].filter(Boolean).join(' · ') || '—'}
+                      </div>
+                    </div>
+                    <div className="shrink-0"><TierBadge tier={p.risk_tier} score={p.risk_score} /></div>
+                  </div>
+                  <div className="mt-2 text-sm">
+                    {ev
+                      ? <><span className="text-fg">{ev.text}</span>{ev.time && <span className="text-xs text-fg-muted"> · {fmtAgo(ev.time)}</span>}</>
+                      : <span className="text-fg-faint">No events recorded</span>}
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                    <SignalStatusBadge status={p.signal_status} />
+                    {p.open_alerts > 0
+                      ? <span className="num rounded-full bg-coral-strong px-2 py-0.5 text-xs font-semibold text-white">{p.open_alerts} open alert{p.open_alerts === 1 ? '' : 's'}</span>
+                      : <span className="text-xs text-fg-faint">No open alerts</span>}
+                  </div>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
       {creating && <CreatePatientDialog onClose={() => setCreating(false)} />}
     </div>
   );

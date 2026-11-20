@@ -102,7 +102,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 to={l.to}
                 end={l.to === '/patients'}
                 className={({ isActive }) => cx(
-                  'whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-semibold',
+                  'whitespace-nowrap rounded-full px-2.5 py-1.5 text-sm font-semibold',
                   isActive ? 'bg-[rgba(0,184,107,0.35)] text-white ring-1 ring-[var(--rq-green-bright)]' : 'text-[#f0f6fc]',
                 )}
               >

@@ -132,7 +132,7 @@ export function Badge({ children, tone = 'neutral', className, title }: {
     outline: 'bg-transparent text-fg-muted border-line',
   } as const;
   return (
-    <span title={title} className={cx('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-2xs font-semibold tracking-wide whitespace-nowrap backdrop-blur', tones[tone], className)}>
+    <span title={title} className={cx('inline-flex max-w-full items-center gap-1 rounded-full border px-2 py-0.5 text-2xs font-semibold tracking-wide whitespace-nowrap backdrop-blur', tones[tone], className)}>
       {children}
     </span>
   );
@@ -178,7 +178,7 @@ export function Card({ title, right, children, className, bodyClass, as: As = 's
       {(title || right) && (
         <div className="panel-head">
           {typeof title === 'string' ? <h2>{title}</h2> : title}
-          {right && <div className="flex items-center gap-2">{right}</div>}
+          {right && <div className="flex min-w-0 flex-wrap items-center gap-2">{right}</div>}
         </div>
       )}
       <div className={bodyClass ?? 'p-3'}>{children}</div>
@@ -348,7 +348,7 @@ export function PageHeader({ title, sub, right }: { title: ReactNode; sub?: Reac
         <h1 className="flex flex-wrap items-center gap-2">{title}</h1>
         {sub && <p className="mt-0.5 text-sm text-fg-muted">{sub}</p>}
       </div>
-      {right && <div className="flex flex-wrap items-center gap-2">{right}</div>}
+      {right && <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">{right}</div>}
     </div>
   );
 }
