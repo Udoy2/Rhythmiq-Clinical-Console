@@ -8,7 +8,15 @@ import { Button, Card, Select } from '../ui';
 
 const SPEEDS = [0.5, 1, 2, 4];
 
-export function DemoControls({ patientId, isDemoPatient, session }: { patientId: string; isDemoPatient: boolean; session: SessionMsg | null }) {
+export function DemoControls({
+  patientId, isDemoPatient, session, stream = 'unknown',
+}: {
+  patientId: string;
+  isDemoPatient: boolean;
+  session: SessionMsg | null;
+  /** From live `status` — avoids Stop/Restart looking "running" when the socket reports disconnected. */
+  stream?: 'connected' | 'disconnected' | 'unknown';
+}) {
   const qc = useQueryClient();
   const records = useQuery({ queryKey: qk.demoRecords, queryFn: api.demoRecords, staleTime: 300_000 });
   const [record, setRecord] = useState('');
@@ -36,7 +44,7 @@ export function DemoControls({ patientId, isDemoPatient, session }: { patientId:
     onSuccess: () => { refresh(); toast.info('Replay stopped'); },
     onError: (e) => toast.error('Could not stop the replay', errorText(e)),
   });
-  const running = !!session?.active && session.source === 'replay';
+  const running = !!session?.active && session.source === 'replay' && stream !== 'disconnected';
   const mock = typeof window !== 'undefined' ? window.__cardiosenseMock : undefined;
 
   return (

@@ -280,7 +280,26 @@ export interface TrendBucket {
 export interface TrendGap { start: string; end: string; from?: string; to?: string }
 export type TrendRange = '24h' | '7d' | '30d' | '90d';
 export const TREND_RANGES: readonly TrendRange[] = ['24h', '7d', '30d', '90d'];
-export interface Trends { range?: TrendRange; bucket_s?: number; from?: string; to?: string; buckets: TrendBucket[]; gaps: TrendGap[] }
+export interface TrendSummary {
+  n_windows?: number | null;
+  monitored_s?: number | null;
+  hr_bpm?: number | null;
+  sdnn_ms?: number | null;
+  rmssd_ms?: number | null;
+  s_burden_pct?: number | null;
+  v_burden_pct?: number | null;
+  risk_score_mean?: number | null;
+  risk_score_max?: number | null;
+}
+export interface Trends {
+  range?: TrendRange;
+  bucket_s?: number;
+  from?: string;
+  to?: string;
+  buckets: TrendBucket[];
+  gaps: TrendGap[];
+  summary?: TrendSummary | null;
+}
 
 /** CONTRACT: copilot. */
 export interface Citation { id: string; kind: string; label: string; time: string | null }

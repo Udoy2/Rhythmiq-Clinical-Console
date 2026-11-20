@@ -80,14 +80,16 @@ describe('reduceLive', () => {
   });
 
   it('tracks quality and stream status', () => {
-    let s = feed(initialLiveState, { type: 'quality', state: 'lead_off', detail: 'RA electrode', sqi: 0.1 });
+    let s = feed(initialLiveState, session(), { type: 'quality', state: 'lead_off', detail: 'RA electrode', sqi: 0.1 });
     expect(s.quality).toEqual({ state: 'lead_off', detail: 'RA electrode', sqi: 0.1 });
     expect(alertsSuppressed(s.quality.state)).toBe(true);
     s = feed(s, { type: 'quality', state: 'ok' });
     expect(alertsSuppressed(s.quality.state)).toBe(false);
+    expect(s.session?.active).toBe(true);
     s = feed(s, { type: 'status', stream: 'disconnected', last_sample_time: '2026-01-01T00:01:00Z' });
     expect(s.stream).toBe('disconnected');
     expect(s.lastSampleTime).toBe('2026-01-01T00:01:00Z');
+    expect(s.session?.active).toBe(false);
   });
 
   it('tolerates unknown message types and extra fields', () => {

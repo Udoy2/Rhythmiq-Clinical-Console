@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { errorText } from '../../api/client';
@@ -18,6 +18,14 @@ export function InsightPanel({ patientId }: { patientId: string }) {
       setQuestion('');
     },
   });
+
+  // Drop mutation result when the patient changes so another patient's answer cannot stick.
+  useEffect(() => {
+    ask.reset();
+    setQuestion('');
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only reset on patient switch
+  }, [patientId]);
+
   const latest = ask.data ?? stored.data?.[0] ?? null;
   const submit = (e: FormEvent) => { e.preventDefault(); if (!ask.isPending) ask.mutate(question.trim() || undefined); };
 

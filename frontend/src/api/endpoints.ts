@@ -1,5 +1,6 @@
-import { download, request } from './client';
+import { buildUrl, download, freshAccessToken, refreshTokens, request } from './client';
 import { asList, normBeat, normDemoRecords, normDevice, normRules, normTrends } from './normalize';
+import { transport } from './transport';
 import type {
   Alert, AlertState, AuditEntry, Beat, CopilotRequest, DemoRecord, DemoReplayRequest, DemoReplayResponse, Device,
   Health, Insight, LoginRequest, LoginResponse, Meta, PairResponse, Patient, PatientCreate, PatientNote, Role,
@@ -54,6 +55,60 @@ export const api = {
   // copilot
   copilot: (body: CopilotRequest) => request<Insight>('POST', '/copilot/query', { body }),
   insights: async (patientId: string) => asList<Insight>(await request<unknown>('GET', `/patients/${patientId}/insights`), 'insights'),
+
+  // Dr. Rhidoy guide
+  assistantSuggestions: (page?: string) =>
+    request<{ id: string; label: string }[]>('GET', '/assistant/suggestions', { query: { page } }),
+  assistantChatStream: async (
+    body: { message: string; page?: string; history?: { role: string; content: string }[] },
+    handlers: { onToken: (text: string) => void; onReplace?: (text: string) => void; onDone?: (source?: string) => void },
+  ) => {
+    const run = async (retry: boolean): Promise<void> => {
+      const token = await freshAccessToken();
+      const res = await transport.fetch(buildUrl('/assistant/chat'), {
+        method: 'POST',
+        headers: {
+          Accept: 'text/event-stream',
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(body),
+      });
+      if (res.status === 401 && retry) {
+        if (await refreshTokens()) return run(false);
+      }
+      if (!res.ok) {
+        let detail = `Request failed (${res.status})`;
+        try {
+          const j = (await res.json()) as { detail?: string };
+          if (typeof j.detail === 'string') detail = j.detail;
+        } catch { /* ignore */ }
+        throw new Error(detail);
+      }
+      if (!res.body) throw new Error('No response stream');
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split('\n\n');
+        buffer = parts.pop() ?? '';
+        for (const part of parts) {
+          const line = part.split('\n').map((l) => l.trim()).find((l) => l.startsWith('data:'));
+          if (!line) continue;
+          try {
+            const payload = JSON.parse(line.slice(5).trim()) as { type: string; text?: string; source?: string };
+            if (payload.type === 'token' && payload.text) handlers.onToken(payload.text);
+            if (payload.type === 'replace' && payload.text) handlers.onReplace?.(payload.text);
+            if (payload.type === 'done') handlers.onDone?.(payload.source);
+          } catch { /* partial JSON */ }
+        }
+      }
+    };
+    await run(true);
+  },
 
   // reports
   reportPdf: (patientId: string, range: TrendRange) => download(`/reports/${patientId}.pdf`, { range }),

@@ -60,13 +60,28 @@ class Settings(BaseSettings):
     # --- web ---
     cors_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
 
-    # --- copilot ---
+    # --- copilot (cited Insights; Anthropic) ---
     anthropic_api_key: str | None = Field(
         default=None, validation_alias=AliasChoices("ANTHROPIC_API_KEY", "CARDIOSENSE_ANTHROPIC_API_KEY")
     )
     llm_model: str = "claude-opus-5-5"
     llm_timeout_s: float = 20.0
     llm_enabled: bool = True
+
+    # --- Dr. Rhidoy guide (OpenAI-compatible; Groq now, DeepSeek later via env swap) ---
+    llm_base_url: str = Field(
+        default="https://api.groq.com/openai/v1",
+        validation_alias=AliasChoices("LLM_BASE_URL", "GROQ_BASE_URL", "CARDIOSENSE_LLM_BASE_URL"),
+    )
+    llm_api_key: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("LLM_API_KEY", "GROQ_API_KEY", "CARDIOSENSE_LLM_API_KEY"),
+    )
+    assistant_llm_model: str = Field(
+        default="openai/gpt-oss-120b",
+        validation_alias=AliasChoices("LLM_MODEL", "GROQ_MODEL", "CARDIOSENSE_ASSISTANT_LLM_MODEL"),
+    )
+    assistant_llm_timeout_s: float = 60.0
 
     # --- notifications ---
     smtp_host: str | None = None

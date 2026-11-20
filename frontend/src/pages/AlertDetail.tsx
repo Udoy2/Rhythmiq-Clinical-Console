@@ -100,7 +100,7 @@ export default function AlertDetailPage() {
             {w && (
               <div className="mt-3 border-t border-line pt-3">
                 <div className="label mb-1.5">Rhythm window at the time</div>
-                <dl className="grid grid-cols-3 gap-2 text-sm">
+                <dl className="grid grid-cols-2 gap-2 text-sm sm:grid-cols-3">
                   <div><dt className="label">HR</dt><dd className="num">{fmtNum(w.hr_bpm)} bpm</dd></div>
                   <div><dt className="label">V burden</dt><dd className="num">{fmtPct(w.v_burden_pct)}</dd></div>
                   <div><dt className="label">S burden</dt><dd className="num">{fmtPct(w.s_burden_pct)}</dd></div>

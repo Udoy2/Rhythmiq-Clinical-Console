@@ -5,6 +5,7 @@ import { api, qk } from '../api/endpoints';
 import { transport } from '../api/transport';
 import { DISCLAIMER } from '../api/types';
 import { BrandLogo } from '../components/BrandLogo';
+import { DrRhidoyChathead } from '../components/DrRhidoyChathead';
 import { Badge, Button } from '../components/ui';
 import { Toaster } from '../components/ui/Toaster';
 import { cx } from '../lib/format';
@@ -68,7 +69,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
         <nav className="flex flex-1 flex-col gap-1 px-2.5">
           {links.filter((l) => l.show).map((l) => (
-            <NavLink key={l.to} to={l.to} className={navClass}>
+            <NavLink key={l.to} to={l.to} end={l.to === '/patients'} className={navClass}>
               <span>{l.label}</span>
               {typeof l.count === 'number' && l.count > 0 && (
                 <span className="num rounded-full bg-coral-strong px-1.5 text-2xs font-semibold text-white" aria-label={`${l.count} open`}>{l.count}</span>
@@ -99,6 +100,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <NavLink
                 key={l.to}
                 to={l.to}
+                end={l.to === '/patients'}
                 className={({ isActive }) => cx(
                   'whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-semibold',
                   isActive ? 'bg-[rgba(0,184,107,0.35)] text-white ring-1 ring-[var(--rq-green-bright)]' : 'text-[#f0f6fc]',
@@ -116,6 +118,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <main id="main" className="mx-auto w-full max-w-[1680px] flex-1 px-4 py-5 sm:px-6">{children}</main>
         <Disclaimer className="sticky bottom-0 z-30" />
         <Toaster />
+        <DrRhidoyChathead />
       </div>
     </div>
   );

@@ -62,6 +62,7 @@ export function normTrends(body: unknown): Trends {
     const end = g.end ?? g.to ?? g.t1 ?? g.end_t;
     if (typeof start === 'string' && typeof end === 'string') gaps.push({ start, end });
   }
+  const summary = o.summary && typeof o.summary === 'object' ? o.summary as Trends['summary'] : null;
   return {
     range: o.range as Trends['range'],
     bucket_s: typeof o.bucket_s === 'number' ? o.bucket_s : undefined,
@@ -69,6 +70,7 @@ export function normTrends(body: unknown): Trends {
     to: typeof o.to === 'string' ? o.to : undefined,
     buckets: asList(Array.isArray(body) ? body : o.buckets, 'buckets'),
     gaps,
+    summary,
   };
 }
 

@@ -90,19 +90,33 @@ export function TrendChart({
     return Array.from({ length: n }, (_, i) => geo.t0 + ((geo.t1 - geo.t0) * i) / (n - 1));
   }, [geo]);
 
+  const hasValue = (i: number) => series.some((s) => typeof points[i]?.values[s.key] === 'number');
   const indexAt = (clientX: number): number | null => {
     const el = wrap.current;
     if (!el || points.length === 0) return null;
     const px = clientX - el.getBoundingClientRect().left;
     const t = geo.t0 + ((px - M.l) / geo.pw) * (geo.t1 - geo.t0);
-    let best = 0, bd = Infinity;
-    for (let i = 0; i < points.length; i++) { const d = Math.abs(points[i].t - t); if (d < bd) { bd = d; best = i; } }
+    let best: number | null = null, bd = Infinity;
+    // Prefer monitored points so hover does not stick on empty range bounds / gap anchors.
+    for (let i = 0; i < points.length; i++) {
+      if (!hasValue(i)) continue;
+      const d = Math.abs(points[i].t - t);
+      if (d < bd) { bd = d; best = i; }
+    }
     return best;
   };
   const onKey = (e: KeyboardEvent) => {
     if (!points.length) return;
-    if (e.key === 'ArrowRight') onHover(Math.min(points.length - 1, (hover ?? -1) + 1));
-    else if (e.key === 'ArrowLeft') onHover(Math.max(0, (hover ?? points.length) - 1));
+    const step = (dir: 1 | -1) => {
+      let i = hover ?? (dir === 1 ? -1 : points.length);
+      for (let n = 0; n < points.length; n++) {
+        i += dir;
+        if (i < 0 || i >= points.length) break;
+        if (hasValue(i)) { onHover(i); return; }
+      }
+    };
+    if (e.key === 'ArrowRight') step(1);
+    else if (e.key === 'ArrowLeft') step(-1);
     else if (e.key === 'Escape') onHover(null);
     else return;
     e.preventDefault();
@@ -161,19 +175,26 @@ export function TrendChart({
               if (b - a < 1) return null;
               return (
                 <g key={i}>
-                  <rect x={a} y={M.t} width={b - a} height={geo.ph} fill="rgba(201,130,10,0.07)" />
-                  <rect x={a} y={M.t} width={b - a} height={geo.ph} fill={`url(#${patId})`} opacity="0.5" />
-                  {b - a > 52 && <text x={(a + b) / 2} y={M.t + 12} textAnchor="middle" fontSize="10" fill={GAP}>no data</text>}
+                  <rect x={a} y={M.t} width={b - a} height={geo.ph} fill="rgba(201,130,10,0.05)" />
+                  <rect x={a} y={M.t} width={b - a} height={geo.ph} fill={`url(#${patId})`} opacity="0.28" />
+                  {/* Label only wide gaps so sparse demo sessions stay readable */}
+                  {b - a > 96 && <text x={(a + b) / 2} y={M.t + 12} textAnchor="middle" fontSize="10" fill={GAP} opacity="0.85">no data</text>}
                 </g>
               );
             })}
             {series.map((s) => runs(points, s.key).map((run, ri) => (
               run.length === 1
-                ? <circle key={`${s.key}-${ri}`} cx={geo.x(points[run[0]].t)} cy={geo.y(points[run[0]].values[s.key] as number)} r="2" fill={s.color} />
+                ? null
                 : <polyline key={`${s.key}-${ri}`} fill="none" stroke={s.color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round"
                     strokeDasharray={s.dashed ? '5 3' : undefined}
                     points={run.map((i) => `${geo.x(points[i].t).toFixed(1)},${geo.y(points[i].values[s.key] as number).toFixed(1)}`).join(' ')} />
             )))}
+            {/* Always mark monitored samples — demo sessions are short, so most runs are single points */}
+            {series.map((s) => points.map((p, i) => {
+              const v = p.values[s.key];
+              if (typeof v !== 'number') return null;
+              return <circle key={`${s.key}-pt-${i}`} cx={geo.x(p.t)} cy={geo.y(v)} r="3.5" fill={s.color} stroke={PAPER} strokeWidth="1.5" />;
+            }))}
             {hp && (
               <g>
                 <line x1={hx} x2={hx} y1={M.t} y2={M.t + geo.ph} stroke={MUTED} strokeDasharray="3 3" />

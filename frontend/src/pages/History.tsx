@@ -70,7 +70,12 @@ export default function HistoryPage() {
       >
         <QueryState query={trends} loadingLabel="Loading trends…" isEmpty={(t: Trends) => !t.buckets.some((b) => b.hr_bpm !== null || b.risk_score !== null || b.v_burden_pct !== null)}
           empty={<EmptyState title="No trend data in this range">Trends appear after the patient has recorded sessions.</EmptyState>}>
-          {(t) => <TrendCharts trends={t} hover={hover} onHover={setHover} fmt={fmt} />}
+          {(t) => (
+            <>
+              <TrendSummaryBar trends={t} isDemo={patient.is_demo} />
+              <TrendCharts trends={t} hover={hover} onHover={setHover} fmt={fmt} />
+            </>
+          )}
         </QueryState>
       </Card>
 
@@ -127,6 +132,25 @@ export default function HistoryPage() {
 
 const EMPTY = { hr: null, sdnn: null, rmssd: null, s: null, v: null, risk: null };
 
+function TrendSummaryBar({ trends, isDemo }: { trends: Trends; isDemo?: boolean }) {
+  const s = trends.summary;
+  const n = trends.buckets.length;
+  const monitoredMin = typeof s?.monitored_s === 'number' ? Math.round(s.monitored_s / 60) : null;
+  const bits = [
+    `${n} monitored period${n === 1 ? '' : 's'}`,
+    monitoredMin !== null ? `~${monitoredMin} min recorded` : null,
+    typeof s?.hr_bpm === 'number' ? `mean HR ${fmtNum(s.hr_bpm)}` : null,
+    typeof s?.risk_score_max === 'number' ? `max risk ${fmtNum(s.risk_score_max)}` : null,
+    typeof s?.v_burden_pct === 'number' ? `mean V ${fmtPct(s.v_burden_pct)}` : null,
+  ].filter(Boolean);
+  return (
+    <p className="mb-3 rounded border border-line bg-ink-800/40 px-3 py-2 text-xs text-fg-muted">
+      {bits.join(' · ')}. Markers are sessions with data; hatched stretches were not recording
+      {isDemo ? ' (demo replays are short, so most of the week is a gap)' : ''}.
+    </p>
+  );
+}
+
 /**
  * Buckets → chart points. The API may return only buckets that have data plus explicit gaps, so an empty
  * point is inserted at every gap start (lines must never bridge a gap) and at the range bounds (so the x-axis
@@ -167,7 +191,8 @@ function TrendCharts({ trends, hover, onHover, fmt }: { trends: Trends; hover: n
         </div>
       </div>
       <p className="mt-2 text-xs text-fg-muted">
-        Hatched areas are periods without recorded data ({gaps.length} gap{gaps.length === 1 ? '' : 's'} in this range). Lines are never drawn across missing data.
+        Hatched areas are periods without recorded data ({gaps.length} gap{gaps.length === 1 ? '' : 's'} in this range).
+        Lines only connect consecutive monitored buckets — they never bridge a gap.
       </p>
       <details className="mt-2">
         <summary className="cursor-pointer text-xs text-teal-text">Show the data as a table</summary>
