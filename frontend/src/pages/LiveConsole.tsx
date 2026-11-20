@@ -128,7 +128,6 @@ export function LiveConsolePage() {
     }
   }, [sessionId, resume, patient.id]);
 
-  // ── alerts: REST backlog merged with what arrives on the socket ──
   const backlog = useQuery({ queryKey: qk.alerts({ patient_id: patient.id, evidence: false }), queryFn: () => api.alerts({ patient_id: patient.id, evidence: false }) });
   useEffect(() => { backlog.data?.forEach((a) => feed.upsertAlert(a)); }, [backlog.data, feed]);
   useEffect(() => {
@@ -198,12 +197,16 @@ export function LiveConsolePage() {
             </div>
             {!session?.active && s.conn === 'open' && (
               <p className="mt-3 rounded border border-dashed border-line px-3 py-2 text-sm text-fg-muted">
-                No active stream for this patient. {canRunDemo(role) ? 'Start a demo replay below, or connect the paired device.' : 'The waveform appears when the paired device starts streaming.'}
+                No active stream for this patient. {canRunDemo(role) ? 'Start a demo replay in the side panel, or connect the paired device.' : 'The waveform appears when the paired device starts streaming.'}
               </p>
             )}
           </Card>
 
           <VitalsStrip window={s.window} />
+          {canUseCopilot(role) && <InsightPanel patientId={patient.id} />}
+        </div>
+
+        <div className="grid min-w-0 grid-cols-1 content-start gap-3 md:grid-cols-2 xl:grid-cols-1">
           {canRunDemo(role) && (
             <DemoControls
               patientId={patient.id}
@@ -212,15 +215,11 @@ export function LiveConsolePage() {
               stream={s.stream}
             />
           )}
-        </div>
-
-        <div className="grid min-w-0 grid-cols-1 content-start gap-3 md:grid-cols-2 xl:grid-cols-1">
           <RhythmCard window={s.window} session={session} suppressed={suppressed} />
           <Card title="Risk" right={<span className="text-2xs text-fg-faint">from the rules engine, every 10 s</span>}>
             <RiskGauge risk={risk} />
           </Card>
           <AlertsPanel alerts={patientAlerts} canAct={canActOnAlerts(role)} onUpdated={(a) => feed.upsertAlert(a)} loading={backlog.isPending} error={backlog.error} />
-          {canUseCopilot(role) && <InsightPanel patientId={patient.id} />}
         </div>
       </div>
     </div>
