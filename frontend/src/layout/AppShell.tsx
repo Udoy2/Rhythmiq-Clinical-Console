@@ -95,14 +95,14 @@ export function AppShell({ children }: { children: ReactNode }) {
               {user && <Button size="sm" onClick={() => void signOut()}>Sign out</Button>}
             </div>
           </div>
-          <nav aria-label="Primary" className="flex gap-1 overflow-x-auto px-2 pb-2">
+          <nav aria-label="Primary" className="flex gap-0.5 overflow-x-auto px-2 pb-2">
             {links.filter((l) => l.show).map((l) => (
               <NavLink
                 key={l.to}
                 to={l.to}
                 end={l.to === '/patients'}
                 className={({ isActive }) => cx(
-                  'whitespace-nowrap rounded px-3 py-1.5 text-sm font-semibold',
+                  'whitespace-nowrap rounded px-2 py-1.5 text-sm font-semibold',
                   isActive ? 'bg-ink text-paper' : 'text-fg-muted',
                 )}
               >

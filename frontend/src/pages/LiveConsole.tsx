@@ -158,7 +158,7 @@ export function LiveConsolePage() {
               <div className="flex min-w-0 flex-wrap items-center gap-2">
                 <h2>ECG</h2>
                 {session && <span className="num text-xs text-fg-muted">{session.fs} Hz · {session.device_id}</span>}
-                {isReplay && session && <Badge tone="amber" className="!text-xs" title="Replayed public recording — not a real patient stream">{replayBadgeText(session)}</Badge>}
+                {isReplay && session && <Badge tone="amber" className="!text-xs max-sm:!whitespace-normal max-sm:!rounded-md" title="Replayed public recording — not a real patient stream">{replayBadgeText(session)}</Badge>}
                 {session && !isReplay && session.active && <Badge tone="ok">LIVE DEVICE</Badge>}
               </div>
             }

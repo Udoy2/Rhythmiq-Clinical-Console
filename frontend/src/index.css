@@ -105,6 +105,8 @@
     @apply px-3 py-2 align-middle;
     border-bottom: 1px solid var(--rq-border);
   }
+  /* Scroll containers must be a containing block, or absolutely-positioned children (sr-only labels) widen the page. */
+  .overflow-x-auto, .overflow-auto { position: relative; }
   ::selection { background: rgba(179, 18, 46, 0.18); }
   * { scrollbar-color: rgba(23, 19, 15, 0.28) transparent; scrollbar-width: thin; }
   button, a, [role='button'] { cursor: pointer; }
