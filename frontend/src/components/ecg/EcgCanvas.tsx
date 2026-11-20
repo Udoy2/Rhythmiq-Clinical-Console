@@ -32,20 +32,20 @@ export function autoHeightMm(widthPx: number, refWindowS = 6): number {
   return Math.max(25, Math.min(40, Math.floor(300 / pxPerMm / 5) * 5));
 }
 
-const BG = '#FFFDF8';
-const TRACE = '#17130F';
-const MINOR = 'rgba(200,110,120,0.16)';
-const MAJOR = 'rgba(200,110,120,0.34)';
-const FAINT = '#6A6158';
-const MUTED = '#4B433B';
-const BAND_BG = '#F3ECE0';
-const ACTIVE = 'rgba(14, 116, 144, 0.16)';
-const MISMATCH = '#B3122E';
+const BG = '#FFFFFF';
+const TRACE = '#0B1F3A';
+const MINOR = 'rgba(0,184,107,0.10)';
+const MAJOR = 'rgba(0,184,107,0.22)';
+const FAINT = '#64748B';
+const MUTED = '#475569';
+const BAND_BG = '#F5F7FA';
+const ACTIVE = 'rgba(34, 211, 238, 0.18)';
+const MISMATCH = '#b42318';
 const GAP_FILL = 'rgba(180, 83, 9, 0.10)';
 const GAP_STROKE = 'rgba(180, 83, 9, 0.45)';
 const GAP_TEXT = '#92400e';
-const CAL_BG = 'rgba(243, 236, 224, 0.95)';
-const CAL_STROKE = 'rgba(23, 19, 15, 0.55)';
+const CAL_BG = 'rgba(245, 247, 250, 0.95)';
+const CAL_STROKE = 'rgba(11, 31, 58, 0.55)';
 const MONO = 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
 const ROW_H = 20;
 const TOOLTIP_W = 232;
@@ -247,7 +247,7 @@ export function EcgCanvas({
       role="group"
       aria-label={`${ariaLabel ?? 'ECG waveform'}. Keys: space pauses, left and right arrows scroll, comma and period step through beats, escape clears the selection.`}
       onKeyDown={onKeyDown}
-      className="relative w-full select-none overflow-hidden rounded-md border border-line bg-paper-raised focus-visible:outline-2"
+      className="relative w-full select-none overflow-hidden rounded-2xl border border-line bg-white focus-visible:outline-2 shadow-md"
       style={{ height: width > 0 ? cssH + 2 : undefined, minHeight: 120 }}
     >
       <canvas

@@ -13,7 +13,7 @@ import { canManageDevices, canSeeAlerts, isAdmin, ROLE_LABEL, useAuth } from '..
 
 export function Disclaimer({ className }: { className?: string }) {
   return (
-    <footer role="contentinfo" className={cx('border-t border-line bg-paper-sunk px-4 py-2 text-center text-xs font-medium text-fg-muted', className)}>
+    <footer role="contentinfo" className={cx('border-t border-line bg-white/95 px-4 py-2 text-center text-xs font-medium text-fg-muted backdrop-blur-md', className)}>
       {DISCLAIMER}
     </footer>
   );
@@ -58,13 +58,13 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen">
-      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded-full focus:bg-ink focus:px-3 focus:py-1.5 focus:text-paper">
+      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:rounded-full focus:bg-teal focus:px-3 focus:py-1.5 focus:text-navy">
         Skip to content
       </a>
 
       <aside className="shell-rail sticky top-0 hidden h-screen w-60 shrink-0 flex-col lg:flex" aria-label="Primary">
-        <div className="flex flex-col items-start gap-2 px-4 py-5">
-          <BrandLogo size="sm" withWordmark />
+        <div className="flex items-center gap-2 px-4 py-5">
+          <BrandLogo size="sm" withWordmark onDark />
           <MockBadge />
         </div>
         <nav className="flex flex-1 flex-col gap-1 px-2.5">
@@ -72,50 +72,50 @@ export function AppShell({ children }: { children: ReactNode }) {
             <NavLink key={l.to} to={l.to} end={l.to === '/patients'} className={navClass}>
               <span>{l.label}</span>
               {typeof l.count === 'number' && l.count > 0 && (
-                <span className="num rounded-full bg-alert-strong px-1.5 text-xs font-semibold text-white" aria-label={`${l.count} open`}>{l.count}</span>
+                <span className="num rounded-full bg-coral-strong px-1.5 text-2xs font-semibold text-white" aria-label={`${l.count} open`}>{l.count}</span>
               )}
             </NavLink>
           ))}
         </nav>
         {user && (
-          <div className="m-3 rounded-md border border-line bg-paper-raised p-3">
-            <div className="truncate text-sm text-fg">{user.name || user.email}</div>
-            <div className="text-xs text-fg-muted">{ROLE_LABEL[user.role] ?? user.role}</div>
-            <Button size="sm" className="mt-3 w-full" onClick={() => void signOut()}>Sign out</Button>
+          <div className="m-3 rounded-2xl border border-white/15 p-3" style={{ background: 'rgba(255,255,255,0.06)' }}>
+            <div className="truncate text-sm text-white">{user.name || user.email}</div>
+            <div className="text-2xs text-[#9fb6cc]">{ROLE_LABEL[user.role] ?? user.role}</div>
+            <Button size="sm" className="mt-3 w-full !border-white/20 !bg-white/10 !text-white hover:!bg-white/15" onClick={() => void signOut()}>Sign out</Button>
           </div>
         )}
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-40 border-b border-line bg-paper-sunk lg:hidden">
+        <header className="sticky top-0 z-40 border-b border-white/10 lg:hidden" style={{ background: 'rgba(11,31,58,0.94)', backdropFilter: 'blur(16px)' }}>
           <div className="flex h-14 items-center gap-3 px-3">
-            <BrandLogo size="sm" withWordmark />
+            <BrandLogo size="sm" withWordmark onDark />
             <MockBadge />
             <div className="ml-auto">
-              {user && <Button size="sm" onClick={() => void signOut()}>Sign out</Button>}
+              {user && <Button size="sm" className="!border-white/20 !bg-white/10 !text-white" onClick={() => void signOut()}>Sign out</Button>}
             </div>
           </div>
-          <nav aria-label="Primary" className="flex gap-0.5 overflow-x-auto px-2 pb-2">
+          <nav aria-label="Primary" className="flex gap-1 overflow-x-auto px-2 pb-2">
             {links.filter((l) => l.show).map((l) => (
               <NavLink
                 key={l.to}
                 to={l.to}
                 end={l.to === '/patients'}
                 className={({ isActive }) => cx(
-                  'whitespace-nowrap rounded px-2 py-1.5 text-sm font-semibold',
-                  isActive ? 'bg-ink text-paper' : 'text-fg-muted',
+                  'whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-semibold',
+                  isActive ? 'bg-[rgba(0,184,107,0.35)] text-white ring-1 ring-[var(--rq-green-bright)]' : 'text-[#f0f6fc]',
                 )}
               >
                 {l.label}
                 {typeof l.count === 'number' && l.count > 0 && (
-                  <span className="ml-1.5 num rounded-full bg-alert-strong px-1.5 text-2xs text-white">{l.count}</span>
+                  <span className="ml-1.5 num rounded-full bg-coral-strong px-1.5 text-2xs text-white">{l.count}</span>
                 )}
               </NavLink>
             ))}
           </nav>
         </header>
 
-        <main id="main" className="mx-auto w-full max-w-[1680px] flex-1 px-4 pb-28 pt-5 sm:px-6">{children}</main>
+        <main id="main" className="mx-auto w-full max-w-[1680px] flex-1 px-4 py-5 sm:px-6">{children}</main>
         <Disclaimer className="sticky bottom-0 z-30" />
         <Toaster />
         <DrRhidoyChathead />

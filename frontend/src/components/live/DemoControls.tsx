@@ -4,7 +4,7 @@ import { errorText } from '../../api/client';
 import { api, qk } from '../../api/endpoints';
 import type { SessionMsg } from '../../api/types';
 import { toast } from '../../state/toasts';
-import { Button, Select } from '../ui';
+import { Button, Card, Select } from '../ui';
 
 const SPEEDS = [0.5, 1, 2, 4];
 
@@ -48,11 +48,7 @@ export function DemoControls({
   const mock = typeof window !== 'undefined' ? window.__cardiosenseMock : undefined;
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between gap-2">
-        <h3 className="text-sm font-bold tracking-tight">Demo replay</h3>
-        <span className="text-xs text-fg-faint">Public recordings</span>
-      </div>
+    <Card title="Demo replay" bodyClass="space-y-2 p-2.5" right={<span className="text-2xs text-fg-faint">Public recordings</span>}>
       {!isDemoPatient && (
         <p className="text-2xs text-amber-text">Replay streams to a demo patient, not this record.</p>
       )}
@@ -77,11 +73,12 @@ export function DemoControls({
         </div>
       </div>
       <div className="flex gap-1.5">
-        <Button size="sm" variant="primary" className="flex-1" onClick={() => start.mutate()} busy={start.isPending && !running} disabled={!record || running}>Start</Button>
-        <Button size="sm" className="flex-1" onClick={() => start.mutate()} busy={start.isPending && running} disabled={!record || !running}>Restart</Button>
+        <Button size="sm" variant="primary" className="flex-1" onClick={() => start.mutate()} busy={start.isPending} disabled={!record}>
+          {running ? 'Restart' : 'Start'}
+        </Button>
         <Button size="sm" className="flex-1" onClick={() => stop.mutate()} busy={stop.isPending} disabled={!running}>Stop</Button>
       </div>
-      {records.isError && <p role="alert" className="text-2xs text-alert-text">Could not load recordings: {errorText(records.error)}</p>}
+      {records.isError && <p role="alert" className="text-2xs text-coral-text">Could not load recordings: {errorText(records.error)}</p>}
       {mock && (
         <div className="flex flex-wrap gap-1 border-t border-dashed border-line pt-2">
           <span className="w-full text-2xs font-semibold text-amber-text">Mock faults</span>
@@ -91,6 +88,6 @@ export function DemoControls({
           <Button size="sm" onClick={() => mock.dropConnection(6)}>Drop</Button>
         </div>
       )}
-    </div>
+    </Card>
   );
 }

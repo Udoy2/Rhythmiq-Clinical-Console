@@ -9,24 +9,24 @@ export function Toaster() {
     <div className="pointer-events-none fixed right-3 top-14 z-50 flex w-[22rem] max-w-[calc(100vw-1.5rem)] flex-col gap-2" aria-live="assertive">
       {toasts.map((t) => {
         const tier = t.tier ? TIER_STYLE[t.tier] : null;
-        const color = tier?.color ?? (t.tone === 'error' ? '#B3122E' : t.tone === 'ok' ? '#2E7D4F' : '#6A6158');
+        const color = tier?.color ?? (t.tone === 'error' ? '#b42318' : t.tone === 'ok' ? '#1f7a4d' : '#6b7c90');
         return (
           <div
             key={t.id}
             role={t.tone === 'alert' || t.tone === 'error' ? 'alert' : 'status'}
-            className="pointer-events-auto rounded-md border bg-paper-raised border-line px-3 py-2.5 shadow-md"
-            style={{ borderColor: color }}
+            className="pointer-events-auto rounded-md border bg-white border-line px-3 py-2.5 shadow-sm"
+            style={{ borderColor: color, borderLeftWidth: 4 }}
           >
             <div className="flex items-start gap-2">
               <span className="mt-0.5">
                 <ShapeGlyph shape={tier?.shape ?? (t.tone === 'error' ? 'octagon' : 'circle')} color={color} size={14} />
               </span>
               <div className="min-w-0 flex-1">
-                {t.tier && <div className="text-xs font-semibold" style={{ color: tier?.text }}>{tierLabel(t.tier)} alert</div>}
+                {t.tier && <div className="text-2xs font-semibold" style={{ color: tier?.text }}>{tierLabel(t.tier)} alert</div>}
                 <div className="text-sm font-semibold text-fg">{t.title}</div>
                 {t.body && <div className="mt-0.5 text-xs text-fg-muted">{t.body}</div>}
                 {t.href && (
-                  <Link to={t.href} onClick={() => dismiss(t.id)} className="mt-1 inline-block text-xs font-medium text-accent-text underline underline-offset-2">
+                  <Link to={t.href} onClick={() => dismiss(t.id)} className="mt-1 inline-block text-xs font-medium text-teal-text underline underline-offset-2">
                     {t.hrefLabel ?? 'Open'}
                   </Link>
                 )}

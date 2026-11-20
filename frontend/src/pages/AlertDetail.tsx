@@ -112,7 +112,7 @@ export default function AlertDetailPage() {
                 )}
               </div>
             )}
-            <Link to={`/patients/${a.patient_id}/sessions/${a.session_id}?t=${Math.max(0, ev?.start_s ?? 0).toFixed(1)}`} className="mt-3 inline-block text-sm font-medium text-accent-text hover:underline">
+            <Link to={`/patients/${a.patient_id}/sessions/${a.session_id}?t=${Math.max(0, ev?.start_s ?? 0).toFixed(1)}`} className="mt-3 inline-block text-sm font-medium text-teal-text hover:underline">
               Replay the session at this moment
             </Link>
           </Card>

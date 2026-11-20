@@ -54,7 +54,7 @@ export function EvidenceStrip({ evidence }: { evidence: AlertEvidence }) {
       </div>
       <BeatLegend className="mt-2" />
       <details className="mt-3" open>
-        <summary className="cursor-pointer text-xs font-medium text-accent-text">Beat labels and probabilities ({beats.length} beats)</summary>
+        <summary className="cursor-pointer text-xs font-medium text-teal-text">Beat labels and probabilities ({beats.length} beats)</summary>
         {beats.length === 0 ? <p className="mt-2 text-sm text-fg-muted">No beats were stored with this snapshot.</p> : (
           <div className="mt-2 max-h-64 overflow-auto rounded border border-line">
             <table>
@@ -77,7 +77,7 @@ export function EvidenceStrip({ evidence }: { evidence: AlertEvidence }) {
                     {hasTruth && (
                       <td>
                         {b.truth ? <span className="inline-flex items-center gap-2"><BeatChip label={b.truth} />
-                          {b.truth !== b.label && <span className="text-xs font-semibold text-alert-text">≠ differs</span>}</span> : <span className="text-fg-faint">—</span>}
+                          {b.truth !== b.label && <span className="text-xs font-semibold text-coral-text">≠ differs</span>}</span> : <span className="text-fg-faint">—</span>}
                       </td>
                     )}
                   </tr>

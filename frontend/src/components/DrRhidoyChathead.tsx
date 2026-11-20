@@ -6,14 +6,37 @@ import { cx } from '../lib/format';
 type Msg = { role: 'user' | 'assistant'; content: string; source?: string };
 type Suggestion = { id: string; label: string };
 
-const NUDGE_KEY = 'rq.nudge.patients';
-const NUDGE_TEXT = 'Need help opening a DEMO patient? I can walk you to Start replay.';
-
-/** The only proactive nudge: once per browser session, on the patient list. */
-const nudgeAllowed = (pathname: string) => {
-  if (pathname !== '/patients') return false;
-  try { return !sessionStorage.getItem(NUDGE_KEY); } catch { return false; }
-};
+function nudgeLines(pathname: string): string[] {
+  if (pathname.includes('/live')) {
+    return [
+      'Need a hand with the live ECG?',
+      'Curious what N / S / V / F mean?',
+      'Questions about rhythm or risk? Tap me.',
+      'Let’s chat if something looks unclear.',
+    ];
+  }
+  if (pathname.includes('/insights')) {
+    return [
+      'I explain the console; Insights cites the record.',
+      'Not sure when to use Insights? Ask me.',
+    ];
+  }
+  if (pathname.startsWith('/patients') && !pathname.includes('/patients/')) {
+    return [
+      'Need help opening a DEMO patient?',
+      'I can walk you to Start replay.',
+      'Got a minute? Let’s chat.',
+    ];
+  }
+  if (pathname.startsWith('/alerts')) {
+    return ['Want a quick tour of alerts?', 'I can explain ack / escalate / close.'];
+  }
+  return [
+    'Need anything? I’m here.',
+    'Let’s chat — product questions welcome.',
+    'Stuck? Tap me for a quick tip.',
+  ];
+}
 
 /** Floating product guide — all authenticated pages (not landing). */
 export function DrRhidoyChathead() {
@@ -33,6 +56,7 @@ export function DrRhidoyChathead() {
   ]);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const nudgeIndex = useRef(0);
   const hideNudgeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -43,16 +67,21 @@ export function DrRhidoyChathead() {
   }, [open, messages, busy]);
 
   useEffect(() => {
-    if (open || !nudgeAllowed(pathname)) return;
-    const first = setTimeout(() => {
-      try { sessionStorage.setItem(NUDGE_KEY, '1'); } catch { /* nudge may repeat; harmless */ }
-      setNudge(NUDGE_TEXT);
+    if (open) return;
+    const showNudge = () => {
+      const lines = nudgeLines(pathname);
+      const text = lines[nudgeIndex.current % lines.length];
+      nudgeIndex.current += 1;
+      setNudge(text);
+      if (hideNudgeTimer.current) clearTimeout(hideNudgeTimer.current);
       hideNudgeTimer.current = setTimeout(() => setNudge(null), 7000);
-    }, 9000);
+    };
+    const first = setTimeout(showNudge, 9000);
+    const interval = setInterval(showNudge, 55000);
     return () => {
       clearTimeout(first);
+      clearInterval(interval);
       if (hideNudgeTimer.current) clearTimeout(hideNudgeTimer.current);
-      setNudge(null);
     };
   }, [open, pathname]);
 
@@ -148,8 +177,7 @@ export function DrRhidoyChathead() {
       <button
         type="button"
         className="rhidoy-fab"
-        aria-label={open ? 'Close help' : 'Open help (Dr. Rhidoy)'}
-        title="Help"
+        aria-label={open ? 'Close Dr. Rhidoy' : 'Open Dr. Rhidoy'}
         onClick={() => (open ? setOpen(false) : openChat())}
       >
         <img src="/brand/dr-rhidoy.svg?v=5" alt="" width={72} height={72} />

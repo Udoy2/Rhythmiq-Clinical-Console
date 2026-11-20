@@ -47,7 +47,7 @@ export default function ReportsPage() {
             <dt className="text-fg-muted">Model version</dt><dd className="text-right"><Mono>{meta.data ? (meta.data.model_loaded ? meta.data.model_version ?? '—' : 'not loaded (rules only)') : '…'}</Mono></dd>
             <dt className="text-fg-muted">Rule version</dt><dd className="text-right"><Mono>{meta.data?.rule_version ?? '…'}</Mono></dd>
           </dl>
-          <p className="mt-3 rounded border border-line bg-paper-sunk px-2 py-1.5 text-xs text-fg-muted">Printed on every report: {meta.data?.disclaimer ?? DISCLAIMER}</p>
+          <p className="mt-3 rounded border border-line bg-ink-800 px-2 py-1.5 text-xs text-fg-muted">Printed on every report: {meta.data?.disclaimer ?? DISCLAIMER}</p>
           {pdf.isError && <div className="mt-2"><Banner tone="critical" title="The report could not be generated.">{errorText(pdf.error)}</Banner></div>}
           <div className="mt-3 flex gap-2">
             <Button variant="primary" busy={pdf.isPending && pdf.variables === 'download'} onClick={() => pdf.mutate('download')}>Download PDF</Button>

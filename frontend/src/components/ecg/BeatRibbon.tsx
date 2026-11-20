@@ -66,7 +66,7 @@ export function BeatRibbon({ source, getHead, spanS = 60, viewRef, onSeek }: Pro
       const X = (t: number) => (t - from) * pxPerS;
 
       // track
-      ctx.fillStyle = '#FFFDF8';
+      ctx.fillStyle = '#FFFFFF';
       ctx.fillRect(0, 0, width, BLOCK_H + 4);
 
       // axis: ticks every 10 s of stream time
@@ -76,9 +76,9 @@ export function BeatRibbon({ source, getHead, spanS = 60, viewRef, onSeek }: Pro
       for (let t = Math.ceil(from / 10) * 10; t <= head; t += 10) {
         if (t < 0) continue;
         const x = X(t);
-        ctx.fillStyle = 'rgba(14,116,144,0.16)';
+        ctx.fillStyle = 'rgba(0,184,107,0.16)';
         ctx.fillRect(Math.round(x), 0, 1, BLOCK_H + 8);
-        ctx.fillStyle = '#6A6158';
+        ctx.fillStyle = '#64748B';
         if (x < width - 28) ctx.fillText(fmtClock(t), x + 3, H - 2);
       }
 
@@ -114,7 +114,7 @@ export function BeatRibbon({ source, getHead, spanS = 60, viewRef, onSeek }: Pro
       if (view) {
         const x0 = Math.max(0.5, X(view.from)), x1 = Math.min(width - 0.5, X(view.to));
         if (x1 > 0 && x0 < width) {
-          ctx.strokeStyle = 'rgba(23,19,15,0.45)';
+          ctx.strokeStyle = 'rgba(11,31,58,0.45)';
           ctx.lineWidth = 1;
           ctx.strokeRect(Math.round(x0) + 0.5, 0.5, Math.max(2, Math.round(x1 - x0) - 1), BLOCK_H + 3);
         }

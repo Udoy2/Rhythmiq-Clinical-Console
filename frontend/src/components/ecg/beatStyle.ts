@@ -18,23 +18,21 @@ export interface BeatStyle {
 
 /** Class encoding is always colour + letter + shape + pattern (never colour alone). */
 export const BEAT_STYLE: Record<BeatLabel, BeatStyle> = {
-  N: { letter: 'N', name: 'Normal', color: '#2E7D4F', text: '#1F6B3F', shape: 'circle', pattern: 'solid', height: 0.5 },
-  S: { letter: 'S', name: 'Supraventricular ectopic', color: '#C26A04', text: '#8A4B08', shape: 'triangle', pattern: 'diagonal', height: 0.75 },
-  V: { letter: 'V', name: 'Ventricular ectopic', color: '#B3122E', text: '#9B0F26', shape: 'square', pattern: 'cross', height: 1 },
-  F: { letter: 'F', name: 'Fusion', color: '#0E7490', text: '#0B5F78', shape: 'diamond', pattern: 'dots', height: 0.75 },
-  Unknown: { letter: '?', name: 'Unknown (low confidence)', color: '#6A6158', text: '#4B433B', shape: 'ring', pattern: 'hollow', height: 0.5 },
+  N: { letter: 'N', name: 'Normal', color: '#00B86B', text: '#047857', shape: 'circle', pattern: 'solid', height: 0.5 },
+  S: { letter: 'S', name: 'Supraventricular ectopic', color: '#d97706', text: '#b45309', shape: 'triangle', pattern: 'diagonal', height: 0.75 },
+  V: { letter: 'V', name: 'Ventricular ectopic', color: '#FF5F57', text: '#dc2626', shape: 'square', pattern: 'cross', height: 1 },
+  F: { letter: 'F', name: 'Fusion', color: '#0891b2', text: '#0e7490', shape: 'diamond', pattern: 'dots', height: 0.75 },
+  Unknown: { letter: '?', name: 'Unknown (low confidence)', color: '#64748B', text: '#475569', shape: 'ring', pattern: 'hollow', height: 0.5 },
 };
 
 export interface TierStyle { name: string; meaning: string; color: string; text: string; bg: string; shape: Shape; action: string }
 export const TIER_STYLE: Record<Tier, TierStyle> = {
-  green: { name: 'Green', meaning: 'Normal', color: '#2E7D4F', text: '#1F6B3F', bg: 'rgba(46, 125, 79, 0.10)', shape: 'circle', action: 'No action' },
-  amber: { name: 'Amber', meaning: 'Watch', color: '#C26A04', text: '#8A4B08', bg: 'rgba(194, 106, 4, 0.12)', shape: 'triangle', action: 'Review within 24 h' },
-  orange: { name: 'Orange', meaning: 'Urgent', color: '#E2570F', text: '#A8420A', bg: 'rgba(226, 87, 15, 0.12)', shape: 'diamond', action: 'Acknowledge within 30 min' },
-  red: { name: 'Red', meaning: 'Critical', color: '#B3122E', text: '#9B0F26', bg: 'rgba(179, 18, 46, 0.10)', shape: 'octagon', action: 'Immediate review' },
+  green: { name: 'Green', meaning: 'Normal', color: '#00B86B', text: '#047857', bg: 'rgba(0, 184, 107, 0.12)', shape: 'circle', action: 'No action' },
+  amber: { name: 'Amber', meaning: 'Watch', color: '#d97706', text: '#b45309', bg: 'rgba(217, 119, 6, 0.12)', shape: 'triangle', action: 'Review within 24 h' },
+  orange: { name: 'Orange', meaning: 'Urgent', color: '#ea580c', text: '#c2410c', bg: 'rgba(234, 88, 12, 0.12)', shape: 'diamond', action: 'Acknowledge within 30 min' },
+  red: { name: 'Red', meaning: 'Critical', color: '#FF5F57', text: '#dc2626', bg: 'rgba(255, 95, 87, 0.12)', shape: 'octagon', action: 'Immediate review' },
 };
-/** Visible tier wording: the clinical word only. The colour name appears in tooltips via `tierTitle`. */
-export const tierLabel = (t: Tier) => TIER_STYLE[t].meaning;
-export const tierTitle = (t: Tier) => `${TIER_STYLE[t].meaning} (${TIER_STYLE[t].name.toLowerCase()} tier)`;
+export const tierLabel = (t: Tier) => `${TIER_STYLE[t].name} — ${TIER_STYLE[t].meaning}`;
 
 /** Risk score bands used by the gauge when drawing the tier scale (the tier itself always comes from the API). */
 export const TIER_BANDS: { tier: Tier; from: number; to: number }[] = [
@@ -134,7 +132,7 @@ export function beatFill(ctx: CanvasRenderingContext2D, label: BeatLabel, dpr = 
     g.stroke();
   } else if (st.pattern === 'cross') {
     // dark horizontal bars cut into the solid block
-    g.strokeStyle = 'rgba(23,19,15,0.45)';
+    g.strokeStyle = 'rgba(11,31,58,0.45)';
     g.beginPath();
     g.moveTo(0, 2.5); g.lineTo(n, 2.5);
     g.stroke();
@@ -155,7 +153,7 @@ export function beatCssBackground(label: BeatLabel): string {
   switch (st.pattern) {
     case 'solid': return st.color;
     case 'diagonal': return `repeating-linear-gradient(135deg, ${st.color} 0 1.5px, ${st.color}47 1.5px 5px)`;
-    case 'cross': return `repeating-linear-gradient(0deg, ${st.color} 0 4px, rgba(23,19,15,0.45) 4px 5.5px)`;
+    case 'cross': return `repeating-linear-gradient(0deg, ${st.color} 0 4px, rgba(11,31,58,0.45) 4px 5.5px)`;
     case 'dots': return `radial-gradient(${st.color} 1.2px, ${st.color}47 1.4px) 0 0 / 5px 5px`;
     case 'hollow': return 'transparent';
   }

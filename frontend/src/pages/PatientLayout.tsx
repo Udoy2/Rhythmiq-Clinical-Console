@@ -55,10 +55,10 @@ export function PatientLayout() {
           <TierBadge tier={p.risk_tier} score={p.risk_score} />
         </div>
       </div>
-      <nav aria-label="Patient sections" className="mb-3 flex gap-1 overflow-x-auto overflow-y-hidden border-b border-line">
+      <nav aria-label="Patient sections" className="mb-3 flex gap-1 overflow-x-auto border-b border-line">
         {tabs.filter((t) => t.show).map((t) => (
           <NavLink key={t.to} to={t.to}
-            className={({ isActive }) => cx('-mb-px whitespace-nowrap border-b-2 px-3 py-1.5 text-sm', isActive ? 'border-accent font-semibold text-fg' : 'border-transparent text-fg-muted hover:text-fg')}>
+            className={({ isActive }) => cx('-mb-px whitespace-nowrap border-b-2 px-3 py-1.5 text-sm', isActive ? 'border-teal font-semibold text-fg' : 'border-transparent text-fg-muted hover:text-fg')}>
             {t.label}
           </NavLink>
         ))}

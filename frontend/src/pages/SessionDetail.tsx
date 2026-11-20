@@ -44,10 +44,10 @@ export default function SessionPage() {
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
-        <Link to={`/patients/${id}/history`} className="text-xs text-accent-text hover:underline">← History</Link>
+        <Link to={`/patients/${id}/history`} className="text-xs text-teal-text hover:underline">← History</Link>
         <h2 className="text-base">Session {fmtDateTime(s.started_at)}</h2>
         {s.source === 'replay' && <Badge tone="amber" className="!text-xs">{replayBadgeText(s)}</Badge>}
-        {s.active && <Badge tone="ok">ACTIVE</Badge>}
+        {s.active && <Badge tone="teal">ACTIVE</Badge>}
         <div className="ml-auto"><Button size="sm" onClick={() => csv.mutate()} busy={csv.isPending}>Export CSV</Button></div>
       </div>
 
@@ -73,7 +73,7 @@ export default function SessionPage() {
       </section>
 
       {s.active ? (
-        <Banner tone="info" title="This session is still recording." action={<Link to={`/patients/${id}/live`} className="text-sm font-medium text-accent-text underline">Open live console</Link>}>
+        <Banner tone="info" title="This session is still recording." action={<Link to={`/patients/${id}/live`} className="text-sm font-medium text-teal-text underline">Open live console</Link>}>
           Replay becomes available when the stream ends.
         </Banner>
       ) : dur && dur > 0 ? (
@@ -202,7 +202,7 @@ function ReplayPlayer({ session, durationS, truncated }: { session: Session; dur
         <div className="mt-2 flex items-center gap-3">
           <span className="num w-14 text-right text-sm text-fg">{fmtClock(pos)}</span>
           <label htmlFor="scrub" className="sr-only">Position in session</label>
-          <input id="scrub" type="range" min={0} max={durationS} step={0.5} value={pos} className="h-1.5 flex-1 accent-ink"
+          <input id="scrub" type="range" min={0} max={durationS} step={0.5} value={pos} className="h-1.5 flex-1 accent-[#1e3a5f]"
             aria-valuetext={`${fmtClock(pos)} of ${fmtClock(durationS)}`}
             onChange={(e) => { wantPlay.current = false; clock.pause(performance.now()); setPlaying(false); seek(Number(e.target.value)); }} />
           <span className="num w-14 text-sm text-fg-muted">{fmtClock(durationS)}</span>
@@ -230,18 +230,18 @@ function ReplayPlayer({ session, durationS, truncated }: { session: Session; dur
                 const st = e.tier ? TIER_STYLE[e.tier] : null;
                 return (
                   <li key={e.key} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3 py-1.5 text-sm">
-                    <button type="button" className="num w-14 shrink-0 text-left text-xs text-accent-text hover:underline" disabled={e.start_s === null}
+                    <button type="button" className="num w-14 shrink-0 text-left text-xs text-teal-text hover:underline" disabled={e.start_s === null}
                       onClick={() => e.start_s !== null && onPan(clock.now(performance.now()) - Math.min(durationS, e.start_s + windowS * 0.7))}
                       aria-label={`Go to ${fmtClock(e.start_s ?? 0)}`}>
                       {e.start_s !== null ? fmtClock(e.start_s) : '—'}
                     </button>
-                    <span className="inline-flex w-20 shrink-0 items-center gap-1.5 text-xs" style={{ color: st?.text ?? '#6A6158' }}>
+                    <span className="inline-flex w-20 shrink-0 items-center gap-1.5 text-xs" style={{ color: st?.text ?? '#6b7c90' }}>
                       {st && <ShapeGlyph shape={st.shape} color={st.color} size={10} />}{st ? st.meaning : e.kind}
                     </span>
                     <span className="min-w-0 flex-1 truncate text-fg" title={e.detail}>{e.label}{e.detail && e.detail !== e.label ? <span className="text-fg-muted"> — {e.detail}</span> : null}</span>
-                    {e.kind === 'alert' && <Badge tone="alert">ALERT</Badge>}
+                    {e.kind === 'alert' && <Badge tone="coral">ALERT</Badge>}
                     {e.ruleId && <Mono>{e.ruleId}</Mono>}
-                    {e.alertId && <Link to={`/alerts/${e.alertId}`} className="text-xs text-accent-text hover:underline">Open alert</Link>}
+                    {e.alertId && <Link to={`/alerts/${e.alertId}`} className="text-xs text-teal-text hover:underline">Open alert</Link>}
                   </li>
                 );
               })}

@@ -31,14 +31,14 @@ export function CitationChip({ c, n, patientId, lookup }: { c: Citation; n: numb
   const href = citationHref(c, patientId, lookup);
   const inner = (
     <>
-      <span className="num font-semibold text-accent-text">[{n}]</span>
+      <span className="num font-semibold text-teal-text">[{n}]</span>
       <span className="text-fg">{c.label || c.id}</span>
       <span className="text-fg-faint">{c.kind}{c.time ? ` · ${fmtDateTime(c.time)}` : ''}</span>
     </>
   );
-  const cls = 'inline-flex max-w-full items-center gap-1.5 rounded border border-line bg-paper-sunk px-1.5 py-0.5 text-xs';
+  const cls = 'inline-flex max-w-full items-center gap-1.5 rounded border border-line bg-ink-800 px-1.5 py-0.5 text-xs';
   return href
-    ? <Link to={href} className={`${cls} hover:border-accent`} title={`Open cited ${c.kind} ${c.id}`}>{inner}</Link>
+    ? <Link to={href} className={`${cls} hover:border-teal`} title={`Open cited ${c.kind} ${c.id}`}>{inner}</Link>
     : <span className={cls} title={`Evidence ${c.id}`}>{inner}</span>;
 }
 
@@ -54,8 +54,8 @@ function InsightText({ text, citations, patientId, lookup }: { text: string; cit
         if (!m || !n) return <Fragment key={i}>{part}</Fragment>;
         const href = citationHref(citations[n - 1], patientId, lookup);
         return href
-          ? <Link key={i} to={href} className="num mx-0.5 text-xs font-semibold text-accent-text hover:underline" title={citations[n - 1].label}>[{n}]</Link>
-          : <span key={i} className="num mx-0.5 text-xs font-semibold text-accent-text">[{n}]</span>;
+          ? <Link key={i} to={href} className="num mx-0.5 text-xs font-semibold text-teal-text hover:underline" title={citations[n - 1].label}>[{n}]</Link>
+          : <span key={i} className="num mx-0.5 text-xs font-semibold text-teal-text">[{n}]</span>;
       })}
     </p>
   );

@@ -17,7 +17,6 @@ const AlertsPage = lazy(() => import('./pages/Alerts'));
 const AlertDetailPage = lazy(() => import('./pages/AlertDetail'));
 const AdminPage = lazy(() => import('./pages/Admin'));
 const AboutPage = lazy(() => import('./pages/About'));
-const PitchPage = lazy(() => import('./pages/Pitch'));
 
 function RequireAuth() {
   const token = useAuth((s) => s.accessToken);
@@ -51,7 +50,6 @@ export function App() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<SignInPage />} />
-      <Route path="/pitch" element={<Suspense fallback={<LoadingState />}><PitchPage /></Suspense>} />
       <Route element={<RequireAuth />}>
         <Route path="/patients" element={<PatientsPage />} />
         <Route path="/patients/:id" element={<PatientLayout />}>
