@@ -103,8 +103,8 @@ export default function HistoryPage() {
                   {[...list].sort((a, b) => (b.started_at ?? '').localeCompare(a.started_at ?? '')).map((s) => {
                     const sm = s.summary ?? {};
                     return (
-                      <tr key={s.id} className="hover:bg-ink-800">
-                        <td className="num whitespace-nowrap">{fmtDateTime(s.started_at)} {s.active && <Badge tone="teal" className="ml-1">ACTIVE</Badge>}</td>
+                      <tr key={s.id} className="hover:bg-paper-sunk">
+                        <td className="num whitespace-nowrap">{fmtDateTime(s.started_at)} {s.active && <Badge tone="ok" className="ml-1">ACTIVE</Badge>}</td>
                         <td>{s.source === 'replay' ? <Badge tone="amber">{replayBadgeText(s)}</Badge> : <span className="text-fg-muted">Device {s.device_id ?? ''}</span>}</td>
                         <td className="num text-right">{fmtDuration(sessionDuration(s))}</td>
                         <td className="num text-right">{fmtNum(sm.beats as number | null)}</td>
@@ -113,7 +113,7 @@ export default function HistoryPage() {
                         <td className="num text-right">{fmtPct(sm.v_burden_pct as number | null)}</td>
                         <td className="num text-right">{fmtNum(sm.alerts as number | null)}</td>
                         <td className="text-right">
-                          <Link to={`/patients/${patient.id}/sessions/${s.id}`} className="text-xs font-medium text-teal-text hover:underline">
+                          <Link to={`/patients/${patient.id}/sessions/${s.id}`} className="text-xs font-medium text-accent-text hover:underline">
                             {s.active ? 'Details' : 'Replay'}<span className="sr-only"> session started {fmtDateTime(s.started_at)}</span>
                           </Link>
                         </td>
@@ -144,7 +144,7 @@ function TrendSummaryBar({ trends, isDemo }: { trends: Trends; isDemo?: boolean 
     typeof s?.v_burden_pct === 'number' ? `mean V ${fmtPct(s.v_burden_pct)}` : null,
   ].filter(Boolean);
   return (
-    <p className="mb-3 rounded border border-line bg-ink-800/40 px-3 py-2 text-xs text-fg-muted">
+    <p className="mb-3 rounded border border-line bg-paper-sunk/40 px-3 py-2 text-xs text-fg-muted">
       {bits.join(' · ')}. Markers are sessions with data; hatched stretches were not recording
       {isDemo ? ' (demo replays are short, so most of the week is a gap)' : ''}.
     </p>
@@ -181,13 +181,13 @@ function TrendCharts({ trends, hover, onHover, fmt }: { trends: Trends; hover: n
   return (
     <div>
       <div className="grid grid-cols-1 gap-x-4 gap-y-4 lg:grid-cols-2">
-        <TrendChart title="Heart rate" unit="bpm" series={[{ key: 'hr', label: 'HR', color: '#1f7a4d' }]} {...common} />
-        <TrendChart title="Risk score" unit="of 100" domain={[0, 100]} series={[{ key: 'risk', label: 'Risk', color: '#6b7c90' }]} {...common} />
-        <TrendChart title="V burden" unit="%" includeZero digits={1} series={[{ key: 'v', label: 'V burden', color: '#b42318' }]} {...common} />
-        <TrendChart title="S burden" unit="%" includeZero digits={1} series={[{ key: 's', label: 'S burden', color: '#b45309' }]} {...common} />
+        <TrendChart title="Heart rate" unit="bpm" series={[{ key: 'hr', label: 'HR', color: '#2E7D4F' }]} {...common} />
+        <TrendChart title="Risk score" unit="of 100" domain={[0, 100]} series={[{ key: 'risk', label: 'Risk', color: '#6A6158' }]} {...common} />
+        <TrendChart title="V burden" unit="%" includeZero digits={1} series={[{ key: 'v', label: 'V burden', color: '#B3122E' }]} {...common} />
+        <TrendChart title="S burden" unit="%" includeZero digits={1} series={[{ key: 's', label: 'S burden', color: '#8A4B08' }]} {...common} />
         <div className="lg:col-span-2">
           <TrendChart title="Heart-rate variability" unit="ms" includeZero
-            series={[{ key: 'sdnn', label: 'SDNN', color: '#1f7a4d' }, { key: 'rmssd', label: 'RMSSD', color: '#1d4ed8', dashed: true }]} {...common} />
+            series={[{ key: 'sdnn', label: 'SDNN', color: '#2E7D4F' }, { key: 'rmssd', label: 'RMSSD', color: '#0E7490', dashed: true }]} {...common} />
         </div>
       </div>
       <p className="mt-2 text-xs text-fg-muted">
@@ -195,7 +195,7 @@ function TrendCharts({ trends, hover, onHover, fmt }: { trends: Trends; hover: n
         Lines only connect consecutive monitored buckets — they never bridge a gap.
       </p>
       <details className="mt-2">
-        <summary className="cursor-pointer text-xs text-teal-text">Show the data as a table</summary>
+        <summary className="cursor-pointer text-xs text-accent-text">Show the data as a table</summary>
         <div className="mt-2 max-h-72 overflow-auto rounded border border-line">
           <table>
             <thead><tr><th scope="col">Time</th><th scope="col" className="text-right">HR bpm</th><th scope="col" className="text-right">SDNN ms</th><th scope="col" className="text-right">RMSSD ms</th>
@@ -227,12 +227,12 @@ function Timeline({ alerts, range }: { alerts: Alert[]; range: TrendRange }) {
   if (inRange.length === 0) return <p className="py-2 text-sm text-fg-muted">No alerts were raised in this period.</p>;
   return (
     <div>
-      <div className="relative mb-3 h-9 rounded-sm border border-line bg-white" role="img" aria-label={`${inRange.length} alerts on a time axis; details are in the list below`}>
+      <div className="relative mb-3 h-9 rounded-sm border border-line bg-paper-raised" role="img" aria-label={`${inRange.length} alerts on a time axis; details are in the list below`}>
         {inRange.map(({ a, t }) => {
           const st = TIER_STYLE[a.tier] ?? TIER_STYLE.amber;
           return (
             <Link key={a.id} to={`/alerts/${a.id}`} title={`${tierLabel(a.tier)}: ${a.title} — ${fmtDateTime(a.created_at)}`}
-              className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded p-1 hover:bg-ink-600" style={{ left: `${Math.min(98.5, Math.max(1.5, ((t - from) / (now - from)) * 100))}%` }}>
+              className="absolute top-1/2 -translate-x-1/2 -translate-y-1/2 rounded p-1 hover:bg-paper-edge" style={{ left: `${Math.min(98.5, Math.max(1.5, ((t - from) / (now - from)) * 100))}%` }}>
               <ShapeGlyph shape={st.shape} color={st.color} size={14} />
               <span className="sr-only">{tierLabel(a.tier)}: {a.title}</span>
             </Link>
@@ -252,7 +252,7 @@ function Timeline({ alerts, range }: { alerts: Alert[]; range: TrendRange }) {
               </span>
               <Link to={`/alerts/${a.id}`} className="min-w-0 flex-1 truncate font-medium text-fg hover:underline">{a.title}</Link>
               <span className="text-xs text-fg-muted">{STATE_LABEL[a.state] ?? a.state}</span>
-              <Link to={`/patients/${a.patient_id}/sessions/${a.session_id}?t=${Math.max(0, a.evidence?.start_s ?? 0).toFixed(1)}`} className="text-xs text-teal-text hover:underline">Replay session</Link>
+              <Link to={`/patients/${a.patient_id}/sessions/${a.session_id}?t=${Math.max(0, a.evidence?.start_s ?? 0).toFixed(1)}`} className="text-xs text-accent-text hover:underline">Replay session</Link>
             </li>
           );
         })}

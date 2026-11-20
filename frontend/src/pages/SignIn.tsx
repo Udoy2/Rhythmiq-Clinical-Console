@@ -2,19 +2,13 @@ import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { ApiError, errorText } from '../api/client';
 import { api } from '../api/endpoints';
-import { transport } from '../api/transport';
 import { BrandLogo } from '../components/BrandLogo';
+import { EcgStrip } from '../components/landing/EcgStrip';
 import { Banner, Button, Field } from '../components/ui';
 import { Disclaimer, MockBadge } from '../layout/AppShell';
 import { useAuth } from '../state/auth';
-
-const DEMO_PASSWORD = 'CardioSense!23';
-const DEMO_ACCOUNTS = [
-  { email: 'clinician@cardiosense.dev', role: 'Clinician' },
-  { email: 'admin@cardiosense.dev', role: 'Org admin' },
-  { email: 'tech@cardiosense.dev', role: 'Technician' },
-  { email: 'patient@cardiosense.dev', role: 'Patient' },
-];
+import { DEMO_ACCOUNTS, DEMO_PASSWORD, SHOW_DEMO } from '../lib/demo';
+import { safeRedirect } from '../lib/safeRedirect';
 
 const POINTS = [
   'Live ECG with beat labels and rhythm rules',
@@ -35,7 +29,7 @@ export function SignInPage() {
   const setSession = useAuth((s) => s.setSession);
   const nav = useNavigate();
   const loc = useLocation();
-  const from = (loc.state as { from?: string } | null)?.from ?? '/patients';
+  const from = safeRedirect((loc.state as { from?: string } | null)?.from);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -67,26 +61,25 @@ export function SignInPage() {
     }
   };
 
-  const showDemo = import.meta.env.DEV || transport.isMock;
+  const showDemo = SHOW_DEMO;
 
   return (
     <div className="flex min-h-screen flex-col">
       <main className="auth-shell flex-1">
         <section className="auth-brand hidden lg:flex">
           <div>
-            <BrandLogo size="lg" withWordmark onDark className="mb-10" />
-            <p className="eyebrow mb-4">AI healthcare · clinician console</p>
-            <h1 className="max-w-md text-4xl font-extrabold leading-tight tracking-tight text-white">
+            <BrandLogo size="lg" withWordmark className="mb-10" />
+            <p className="max-w-md text-4xl font-extrabold leading-tight tracking-tight text-ink">
               See every beat.<br />
-              <span className="gradient-text">Act on evidence.</span>
-            </h1>
-            <p className="mt-4 max-w-sm text-sm text-[#b7c9db]">
-              Stream, classify, and escalate with Rhythmiq — navy foundation, medical green, cyan AI clarity.
+              <span className="text-accent-text">Act on evidence.</span>
+            </p>
+            <p className="mt-4 max-w-sm text-base text-fg-muted">
+              Stream, classify and escalate: every beat labelled, every alert tied to its evidence.
             </p>
             <ul className="mt-10 space-y-3">
               {POINTS.map((item) => (
-                <li key={item} className="flex items-start gap-3 text-sm text-[#d8e6f4]">
-                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[rgba(0,184,107,0.2)] text-[var(--rq-green-bright)]" aria-hidden="true">
+                <li key={item} className="flex items-start gap-3 text-sm text-fg">
+                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent-dim text-accent-text" aria-hidden="true">
                     <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
                       <path d="M2.5 6.2L4.8 8.5L9.5 3.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
@@ -96,7 +89,10 @@ export function SignInPage() {
               ))}
             </ul>
           </div>
-          <p className="text-xs text-[#8aa0b8]">Research and demonstration system — not a medical device.</p>
+          <div>
+            <EcgStrip className="mb-6" />
+            <p className="text-xs text-fg-muted">Research and demonstration system — not a medical device.</p>
+          </div>
         </section>
 
         <section className="auth-form">
@@ -106,10 +102,10 @@ export function SignInPage() {
               <MockBadge />
             </div>
             <div className="mb-2 flex items-center gap-3">
-              <Link to="/" className="text-xs font-semibold text-teal-text hover:underline">← Rhythmiq home</Link>
+              <Link to="/" className="text-xs font-semibold text-accent-text hover:underline">← Rhythmiq home</Link>
               <span className="hidden lg:inline"><MockBadge /></span>
             </div>
-            <h2 className="text-2xl font-extrabold tracking-tight text-navy">Welcome back</h2>
+            <h1 className="text-2xl font-extrabold tracking-tight text-ink">Welcome back</h1>
             <p className="mt-1 text-sm text-fg-muted">Sign in to the Rhythmiq monitoring console.</p>
 
             <form onSubmit={submit} className="panel mt-6 space-y-3 p-5" aria-label="Sign in">
@@ -140,7 +136,7 @@ export function SignInPage() {
                       <button
                         type="button"
                         onClick={() => { setEmail(a.email); setPassword(DEMO_PASSWORD); setNeedOtp(false); setOtp(''); setError(null); }}
-                        className="flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left text-xs hover:bg-ink-800"
+                        className="flex w-full items-center justify-between rounded px-2 py-1.5 text-left text-xs hover:bg-paper-sunk"
                       >
                         <span className="num text-fg">{a.email}</span>
                         <span className="text-fg-muted">{a.role}</span>

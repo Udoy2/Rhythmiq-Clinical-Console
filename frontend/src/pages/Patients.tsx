@@ -77,7 +77,7 @@ export function PatientsPage() {
                 const ev = lastEventText(p.last_event);
                 const age = ageFromDob(p.dob);
                 return (
-                  <tr key={p.id} className="cursor-pointer hover:bg-ink-800" onClick={() => nav(`/patients/${p.id}/live`)}>
+                  <tr key={p.id} className="cursor-pointer hover:bg-paper-sunk" onClick={() => nav(`/patients/${p.id}/live`)}>
                     <td>
                       <div className="flex items-center gap-2">
                         <Link to={`/patients/${p.id}/live`} className="font-medium text-fg hover:underline" onClick={(e) => e.stopPropagation()}>{p.name}</Link>
@@ -100,11 +100,11 @@ export function PatientsPage() {
                     <td><SignalStatusBadge status={p.signal_status} /></td>
                     <td className="text-right">
                       {p.open_alerts > 0
-                        ? <span className="num rounded-sm bg-coral-strong px-1.5 py-0.5 text-xs font-semibold text-white">{p.open_alerts}<span className="sr-only"> open alerts</span></span>
+                        ? <span className="num rounded-sm bg-alert-strong px-1.5 py-0.5 text-xs font-semibold text-white">{p.open_alerts}<span className="sr-only"> open alerts</span></span>
                         : <span className="num text-fg-faint">0</span>}
                     </td>
                     <td className="text-right">
-                      <Link to={`/patients/${p.id}/live`} className="text-xs font-medium text-teal-text hover:underline" onClick={(e) => e.stopPropagation()} aria-label={`Open live console for ${p.name}`}>
+                      <Link to={`/patients/${p.id}/live`} className="text-xs font-medium text-accent-text hover:underline" onClick={(e) => e.stopPropagation()} aria-label={`Open live console for ${p.name}`}>
                         Live console
                       </Link>
                     </td>
@@ -159,8 +159,8 @@ function CreatePatientDialog({ onClose }: { onClose: () => void }) {
           )}
         </Field>
         <Field label="Clinical notes (optional)">{(id) => <textarea id={id} className="input min-h-[4rem]" value={f.notes} onChange={(e) => setF({ ...f, notes: e.target.value })} />}</Field>
-        <label className="flex items-start gap-2 rounded border border-line bg-ink-900 p-2.5 text-sm">
-          <input type="checkbox" className="mt-0.5 h-4 w-4 accent-[#1e3a5f]" checked={f.consent} onChange={(e) => setF({ ...f, consent: e.target.checked })} />
+        <label className="flex items-start gap-2 rounded border border-line bg-paper-raised p-2.5 text-sm">
+          <input type="checkbox" className="mt-0.5 h-4 w-4 accent-ink" checked={f.consent} onChange={(e) => setF({ ...f, consent: e.target.checked })} />
           <span>
             <span className="font-medium text-fg">The patient has given informed consent</span>
             <span className="block text-xs text-fg-muted">Consent to ECG recording and processing is required before a device can stream for this patient.</span>

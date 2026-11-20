@@ -7,6 +7,8 @@ import type {
   RulesConfig, Session, SessionEvent, SignalChunk, Tier, TrendRange, Trends, User,
 } from './types';
 
+const seg = encodeURIComponent;
+
 export const api = {
   // auth
   login: (body: LoginRequest) => request<LoginResponse>('POST', '/auth/login', { body, auth: false }),
@@ -17,11 +19,11 @@ export const api = {
 
   // patients
   patients: async (q?: string) => asList<Patient>(await request<unknown>('GET', '/patients', { query: { q } }), 'patients'),
-  patient: (id: string) => request<Patient>('GET', `/patients/${id}`),
+  patient: (id: string) => request<Patient>('GET', `/patients/${seg(id)}`),
   createPatient: (body: PatientCreate) => request<Patient>('POST', '/patients', { body }),
-  updatePatient: (id: string, body: Partial<PatientCreate>) => request<Patient>('PATCH', `/patients/${id}`, { body }),
-  notes: async (id: string) => asList<PatientNote>(await request<unknown>('GET', `/patients/${id}/notes`), 'notes'),
-  addNote: (id: string, body: { text: string; kind?: string }) => request<PatientNote>('POST', `/patients/${id}/notes`, { body }),
+  updatePatient: (id: string, body: Partial<PatientCreate>) => request<Patient>('PATCH', `/patients/${seg(id)}`, { body }),
+  notes: async (id: string) => asList<PatientNote>(await request<unknown>('GET', `/patients/${seg(id)}/notes`), 'notes'),
+  addNote: (id: string, body: { text: string; kind?: string }) => request<PatientNote>('POST', `/patients/${seg(id)}/notes`, { body }),
 
   // devices
   devices: async () => asList<Device & Record<string, unknown>>(await request<unknown>('GET', '/devices'), 'devices').map(normDevice),
@@ -30,31 +32,31 @@ export const api = {
   pairDevice: (body: { pairing_code: string; device_id?: string }) => request<PairResponse>('POST', '/devices/pair', { body }),
 
   // sessions
-  sessions: async (patientId: string) => asList<Session>(await request<unknown>('GET', `/patients/${patientId}/sessions`), 'sessions'),
-  session: (id: string) => request<Session>('GET', `/sessions/${id}`),
+  sessions: async (patientId: string) => asList<Session>(await request<unknown>('GET', `/patients/${seg(patientId)}/sessions`), 'sessions'),
+  session: (id: string) => request<Session>('GET', `/sessions/${seg(id)}`),
   sessionBeats: async (id: string, from?: number, to?: number, fs?: number): Promise<Beat[]> =>
-    asList<Record<string, unknown>>(await request<unknown>('GET', `/sessions/${id}/beats`, { query: { from, to } }), 'beats')
+    asList<Record<string, unknown>>(await request<unknown>('GET', `/sessions/${seg(id)}/beats`, { query: { from, to } }), 'beats')
       .map((b) => normBeat(b, fs)),
   sessionEvents: async (id: string, findingsOnly = false) =>
-    asList<SessionEvent>(await request<unknown>('GET', `/sessions/${id}/events`, { query: findingsOnly ? { findings_only: true } : undefined }), 'events'),
+    asList<SessionEvent>(await request<unknown>('GET', `/sessions/${seg(id)}/events`, { query: findingsOnly ? { findings_only: true } : undefined }), 'events'),
   sessionSignal: (id: string, from?: number, to?: number) =>
-    request<SignalChunk>('GET', `/sessions/${id}/signal`, { query: { from, to } }),
-  sessionCsv: (id: string) => download(`/sessions/${id}/export.csv`),
+    request<SignalChunk>('GET', `/sessions/${seg(id)}/signal`, { query: { from, to } }),
+  sessionCsv: (id: string) => download(`/sessions/${seg(id)}/export.csv`),
 
   // trends
   trends: async (patientId: string, range: TrendRange): Promise<Trends> =>
-    normTrends(await request<unknown>('GET', `/patients/${patientId}/trends`, { query: { range } })),
+    normTrends(await request<unknown>('GET', `/patients/${seg(patientId)}/trends`, { query: { range } })),
 
   // alerts
   alerts: async (f: { state?: AlertState | ''; tier?: Tier | ''; patient_id?: string; evidence?: boolean } = {}) =>
     asList<Alert>(await request<unknown>('GET', '/alerts', { query: f }), 'alerts'),
-  alert: (id: string) => request<Alert>('GET', `/alerts/${id}`),
+  alert: (id: string) => request<Alert>('GET', `/alerts/${seg(id)}`),
   alertAction: (id: string, action: 'ack' | 'escalate' | 'close', note: string) =>
-    request<Alert>('POST', `/alerts/${id}/${action}`, { body: { note: note || null } }),
+    request<Alert>('POST', `/alerts/${seg(id)}/${action}`, { body: { note: note || null } }),
 
   // copilot
   copilot: (body: CopilotRequest) => request<Insight>('POST', '/copilot/query', { body }),
-  insights: async (patientId: string) => asList<Insight>(await request<unknown>('GET', `/patients/${patientId}/insights`), 'insights'),
+  insights: async (patientId: string) => asList<Insight>(await request<unknown>('GET', `/patients/${seg(patientId)}/insights`), 'insights'),
 
   // Dr. Rhidoy guide
   assistantSuggestions: (page?: string) =>
@@ -111,7 +113,7 @@ export const api = {
   },
 
   // reports
-  reportPdf: (patientId: string, range: TrendRange) => download(`/reports/${patientId}.pdf`, { range }),
+  reportPdf: (patientId: string, range: TrendRange) => download(`/reports/${seg(patientId)}.pdf`, { range }),
 
   // demo
   demoRecords: async (): Promise<DemoRecord[]> => normDemoRecords(await request<unknown>('GET', '/demo/records')),
@@ -122,7 +124,7 @@ export const api = {
   audit: async (f: { actor?: string; from?: string; to?: string; action?: string }) =>
     asList<AuditEntry>(await request<unknown>('GET', '/audit', { query: f }), 'entries', 'audit'),
   users: async () => asList<User>(await request<unknown>('GET', '/admin/users'), 'users'),
-  updateUser: (id: string, body: { role?: Role; active?: boolean }) => request<User>('PATCH', `/admin/users/${id}`, { body }),
+  updateUser: (id: string, body: { role?: Role; active?: boolean }) => request<User>('PATCH', `/admin/users/${seg(id)}`, { body }),
   rules: async (): Promise<RulesConfig> => normRules(await request<unknown>('GET', '/admin/rules')),
   putRules: async (thresholds: Record<string, unknown>): Promise<RulesConfig> =>
     normRules(await request<unknown>('PUT', '/admin/rules', { body: { thresholds } })),

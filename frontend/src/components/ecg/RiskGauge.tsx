@@ -13,7 +13,7 @@ export function RiskGauge({ risk }: { risk: Risk | null }) {
     <div>
       <div className="flex items-end justify-between gap-3">
         <div className="flex items-baseline gap-2">
-          <span className="num text-4xl font-semibold leading-none" style={{ color: st?.text ?? '#7F93A6' }}>
+          <span className="num text-4xl font-semibold leading-none" style={{ color: st?.text ?? '#6A6158' }}>
             {score === null ? '—' : Math.round(score)}
           </span>
           <span className="text-xs text-fg-faint">/ 100</span>
@@ -51,7 +51,7 @@ export function RiskGauge({ risk }: { risk: Risk | null }) {
                   width: `${b.to - b.from}%`,
                   background: TIER_STYLE[b.tier].color,
                   opacity: on ? 1 : 0.32,
-                  outline: on ? '1px solid #E6EDF3' : 'none',
+                  outline: on ? '1px solid #17130F' : 'none',
                   outlineOffset: 1,
                 }}
               />

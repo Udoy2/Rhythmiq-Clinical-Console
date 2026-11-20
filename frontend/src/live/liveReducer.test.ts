@@ -166,12 +166,12 @@ describe('LiveFeed buffers', () => {
   it('does not toast the alerts the server replays right after the socket opens, but toasts later ones', () => {
     const f = new LiveFeed('p1');
     f.dispatch({ kind: 'conn', conn: 'open' });
-    (f as unknown as { openedAt: number }).openedAt = performance.now();
+    // Backlog is decided by created_at against the wall-clock time of the open.
+    (f as unknown as { openedAtWall: number }).openedAtWall = Date.parse('2026-01-01T00:00:10Z') + 100;
     f.handle({ type: 'alert', alert: alert('old') });
     expect(f.store.getState().alerts.map((a) => a.id)).toEqual(['old']);
     expect(f.store.getState().toastQueue).toEqual([]);
-    (f as unknown as { openedAt: number }).openedAt = performance.now() - 10_000;
-    f.handle({ type: 'alert', alert: alert('new') });
+    f.handle({ type: 'alert', alert: alert('new', { created_at: '2026-01-01T00:00:20Z' }) });
     expect(f.store.getState().toastQueue).toEqual(['new']);
   });
 

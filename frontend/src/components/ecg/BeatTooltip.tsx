@@ -32,7 +32,7 @@ export function BeatDetails({ beat }: { beat: TimedBeat }) {
               <tr key={c}>
                 <td className="w-5 border-0 p-0 py-[1px] font-mono font-semibold" style={{ color: BEAT_STYLE[c].text }}>{c}</td>
                 <td className="border-0 p-0 py-[1px]">
-                  <div className="h-1.5 w-full rounded-sm bg-ink-600">
+                  <div className="h-1.5 w-full rounded-sm bg-paper-edge">
                     <div className="h-1.5 rounded-sm" style={{ width: `${Math.max(0, Math.min(1, p)) * 100}%`, background: BEAT_STYLE[c].color }} />
                   </div>
                 </td>
@@ -48,7 +48,7 @@ export function BeatDetails({ beat }: { beat: TimedBeat }) {
         {truth ? (
           <span className="inline-flex items-center gap-1.5">
             <span className="font-mono font-semibold" style={{ color: truth.text }}>{truth.letter}</span>
-            <span className={ag === 'mismatch' ? 'font-semibold text-coral-text' : 'text-fg-muted'}>
+            <span className={ag === 'mismatch' ? 'font-semibold text-alert-text' : 'text-fg-muted'}>
               {ag === 'mismatch' ? '≠ differs from model' : '= agrees'}
             </span>
           </span>
@@ -66,7 +66,7 @@ export function BeatDetails({ beat }: { beat: TimedBeat }) {
 
 export function BeatTooltip({ beat, pinned }: { beat: TimedBeat; pinned?: boolean }) {
   return (
-    <div role="tooltip" className="rounded border border-line bg-white p-2 text-xs shadow-md">
+    <div role="tooltip" className="rounded border border-line bg-paper-raised p-2 text-xs shadow-md">
       <BeatDetails beat={beat} />
       <div className="mt-1 text-2xs text-fg-faint">{pinned ? 'Pinned — click again or press Esc to release' : 'Click to pin'}</div>
       <span className="sr-only" aria-live="polite">

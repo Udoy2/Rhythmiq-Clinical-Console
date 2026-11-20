@@ -6,7 +6,7 @@ import type { UseQueryResult } from '@tanstack/react-query';
 import { errorText } from '../../api/client';
 import type { BeatLabel, Tier } from '../../api/types';
 import { cx } from '../../lib/format';
-import { BEAT_STYLE, beatCssBackground, shapeSvgPath, TIER_STYLE, type Shape } from '../ecg/beatStyle';
+import { BEAT_STYLE, beatCssBackground, shapeSvgPath, TIER_STYLE, tierTitle, type Shape } from '../ecg/beatStyle';
 
 // ───────────── Button ─────────────
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
@@ -14,8 +14,8 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> { variant?
 const VARIANT: Record<Variant, string> = {
   primary: 'btn-primary border-transparent',
   secondary: 'btn-secondary',
-  ghost: 'bg-transparent text-fg-muted hover:text-fg hover:bg-ink-800 border-transparent rounded-full',
-  danger: 'rounded-full bg-coral-strong text-white hover:bg-[#e54840] border-transparent font-semibold',
+  ghost: 'bg-transparent text-fg-muted hover:text-fg hover:bg-paper-sunk border-transparent rounded',
+  danger: 'rounded bg-alert-strong text-white hover:bg-alert-text border-transparent font-semibold',
 };
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   { variant = 'secondary', size = 'md', busy, className, children, disabled, type = 'button', ...rest }, ref,
@@ -54,7 +54,7 @@ export function Spinner({ size = 16, label }: { size?: number; label?: string })
   );
 }
 export function Skeleton({ className }: { className?: string }) {
-  return <div className={cx('animate-pulse rounded bg-ink-700', className)} aria-hidden="true" />;
+  return <div className={cx('animate-pulse rounded bg-paper-deep', className)} aria-hidden="true" />;
 }
 
 // ───────────── Shape glyph ─────────────
@@ -68,18 +68,19 @@ export function ShapeGlyph({ shape, color, size = 12, hollow }: { shape: Shape; 
 }
 
 // ───────────── Tier badge ─────────────
-export function TierBadge({ tier, score, compact }: { tier: Tier | null | undefined; score?: number | null; compact?: boolean }) {
+export function TierBadge({ tier, score }: { tier: Tier | null | undefined; score?: number | null; compact?: boolean }) {
   if (!tier || !TIER_STYLE[tier]) {
     return <span className="inline-flex items-center gap-1.5 rounded border border-line px-1.5 py-0.5 text-xs text-fg-faint">No data</span>;
   }
   const st = TIER_STYLE[tier];
   return (
     <span
-      className="inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium whitespace-nowrap backdrop-blur"
+      title={tierTitle(tier)}
+      className="inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-xs font-medium whitespace-nowrap"
       style={{ borderColor: `${st.color}66`, background: st.bg, color: st.text }}
     >
       <ShapeGlyph shape={st.shape} color={st.color} size={11} />
-      <span>{compact ? st.meaning : `${st.name} — ${st.meaning}`}</span>
+      <span>{st.meaning}</span>
       {typeof score === 'number' && <span className="num border-l border-line pl-1.5">{Math.round(score)}</span>}
     </span>
   );
@@ -122,17 +123,17 @@ export function BeatLegend({ className }: { className?: string }) {
 
 // ───────────── Badge ─────────────
 export function Badge({ children, tone = 'neutral', className, title }: {
-  children: ReactNode; tone?: 'neutral' | 'teal' | 'amber' | 'coral' | 'outline'; className?: string; title?: string;
+  children: ReactNode; tone?: 'neutral' | 'ok' | 'amber' | 'alert' | 'outline'; className?: string; title?: string;
 }) {
   const tones = {
-    neutral: 'bg-ink-800 text-fg-muted border-line',
-    teal: 'bg-teal-dim text-teal-text border-teal/40',
+    neutral: 'bg-paper-sunk text-fg-muted border-line',
+    ok: 'bg-accent-dim text-accent-text border-accent/40',
     amber: 'bg-amber-dim text-amber-text border-amber/50',
-    coral: 'bg-coral-dim text-coral-text border-coral/50',
+    alert: 'bg-alert-dim text-alert-text border-alert/50',
     outline: 'bg-transparent text-fg-muted border-line',
   } as const;
   return (
-    <span title={title} className={cx('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-2xs font-semibold tracking-wide whitespace-nowrap backdrop-blur', tones[tone], className)}>
+    <span title={title} className={cx('inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold tracking-wide whitespace-nowrap', tones[tone], className)}>
       {children}
     </span>
   );
@@ -144,10 +145,10 @@ export function DemoBadge({ className }: { className?: string }) {
 // ───────────── Banner ─────────────
 type Tone = 'info' | 'warn' | 'critical' | 'ok';
 const BANNER: Record<Tone, { cls: string; shape: Shape; color: string }> = {
-  info: { cls: 'border-line bg-ink-800 text-fg', shape: 'circle', color: '#0891b2' },
-  ok: { cls: 'border-teal/40 bg-teal-dim text-fg', shape: 'circle', color: '#00B86B' },
-  warn: { cls: 'border-amber/50 bg-amber-dim text-fg', shape: 'triangle', color: '#d97706' },
-  critical: { cls: 'border-coral/50 bg-coral-dim text-fg', shape: 'octagon', color: '#FF5F57' },
+  info: { cls: 'border-line bg-paper-sunk text-fg', shape: 'circle', color: '#0E7490' },
+  ok: { cls: 'border-accent/40 bg-accent-dim text-fg', shape: 'circle', color: '#2E7D4F' },
+  warn: { cls: 'border-amber/50 bg-amber-dim text-fg', shape: 'triangle', color: '#C26A04' },
+  critical: { cls: 'border-alert/50 bg-alert-dim text-fg', shape: 'octagon', color: '#B3122E' },
 };
 export function Banner({ tone = 'info', title, children, action, live }: {
   tone?: Tone; title: ReactNode; children?: ReactNode; action?: ReactNode; live?: boolean;
@@ -186,6 +187,19 @@ export function Card({ title, right, children, className, bodyClass, as: As = 's
   );
 }
 
+/** One titled section inside a shared panel (hairline dividers come from the parent). */
+export function SideSection({ title, right, children, className }: { title: ReactNode; right?: ReactNode; children: ReactNode; className?: string }) {
+  return (
+    <section className={cx('px-4 py-3', className)}>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        {typeof title === 'string' ? <h2 className="text-sm font-bold tracking-tight">{title}</h2> : title}
+        {right}
+      </div>
+      {children}
+    </section>
+  );
+}
+
 // ───────────── States ─────────────
 export function EmptyState({ title, children, action }: { title: string; children?: ReactNode; action?: ReactNode }) {
   return (
@@ -199,7 +213,7 @@ export function EmptyState({ title, children, action }: { title: string; childre
 export function ErrorState({ error, onRetry, title = 'Could not load this' }: { error: unknown; onRetry?: () => void; title?: string }) {
   return (
     <div role="alert" className="flex flex-col items-center justify-center gap-1.5 px-4 py-8 text-center">
-      <p className="text-sm font-medium text-coral-text">{title}</p>
+      <p className="text-sm font-medium text-alert-text">{title}</p>
       <p className="max-w-md text-sm text-fg-muted">{errorText(error)}</p>
       {onRetry && <Button size="sm" className="mt-2" onClick={onRetry}>Try again</Button>}
     </div>
@@ -235,7 +249,7 @@ export function Field({ label, hint, error, children, className }: {
     <div className={cx('flex flex-col gap-1', className)}>
       <label htmlFor={id} className="label">{label}</label>
       {children(id, hint || error ? descId : undefined)}
-      {(error || hint) && <p id={descId} className={cx('text-xs', error ? 'text-coral-text' : 'text-fg-faint')}>{error ?? hint}</p>}
+      {(error || hint) && <p id={descId} className={cx('text-xs', error ? 'text-alert-text' : 'text-fg-faint')}>{error ?? hint}</p>}
     </div>
   );
 }
@@ -248,7 +262,7 @@ export function Segmented<T extends string | number>({ label, value, options, on
   label: string; value: T; options: readonly T[]; onChange: (v: T) => void; format?: (v: T) => ReactNode; size?: 'sm' | 'md';
 }) {
   return (
-    <div role="radiogroup" aria-label={label} className="inline-flex rounded-full border border-line bg-ink-800 p-0.5">
+    <div role="radiogroup" aria-label={label} className="inline-flex rounded border border-line bg-paper-sunk p-0.5">
       {options.map((o) => {
         const on = o === value;
         return (
@@ -259,9 +273,9 @@ export function Segmented<T extends string | number>({ label, value, options, on
             aria-checked={on}
             onClick={() => onChange(o)}
             className={cx(
-              'rounded-full px-2 num whitespace-nowrap transition-colors',
+              'rounded-sm px-2 num whitespace-nowrap transition-colors',
               size === 'sm' ? 'h-6 text-xs' : 'h-7 text-sm',
-              on ? 'bg-white text-navy font-semibold shadow-sm ring-1 ring-[var(--rq-green)]' : 'text-fg-muted hover:text-fg',
+              on ? 'bg-ink text-paper font-semibold' : 'text-fg-muted hover:text-fg',
             )}
           >
             {format ? format(o) : String(o)}
@@ -282,7 +296,7 @@ export function Toggle({ checked, onChange, label, disabled }: { checked: boolea
       onClick={() => onChange(!checked)}
       className="inline-flex items-center gap-2 text-xs text-fg-muted hover:text-fg disabled:opacity-50 disabled:cursor-not-allowed"
     >
-      <span className={cx('relative inline-block h-4 w-7 rounded-full border transition-colors', checked ? 'bg-teal border-teal' : 'bg-ink-700 border-line')}>
+      <span className={cx('relative inline-block h-4 w-7 rounded-full border transition-colors', checked ? 'bg-accent border-accent' : 'bg-paper-deep border-line')}>
         <span className={cx('absolute top-[1px] h-3 w-3 rounded-full transition-all', checked ? 'left-[13px] bg-white' : 'left-[1px] bg-fg-muted')} />
       </span>
       <span>{label}</span>
@@ -300,7 +314,7 @@ export function Dialog({ open, onClose, title, children, footer, wide }: {
   useEffect(() => {
     const d = ref.current;
     if (!d) return;
-    if (open && !d.open) d.showModal();
+    if (open && !d.open) { d.showModal(); d.querySelector<HTMLElement>('[data-autofocus]')?.focus(); }
     if (!open && d.open) d.close();
   }, [open]);
   return (
@@ -309,7 +323,7 @@ export function Dialog({ open, onClose, title, children, footer, wide }: {
       aria-labelledby={titleId}
       onCancel={(e) => { e.preventDefault(); onClose(); }}
       onClick={(e) => { if (e.target === ref.current) onClose(); }}
-      className={cx('m-auto w-[calc(100%-2rem)] rounded-md border border-line bg-white p-0 text-fg shadow-md backdrop:bg-navy/45', wide ? 'max-w-2xl' : 'max-w-md')}
+      className={cx('m-auto w-[calc(100%-2rem)] rounded-md border border-line bg-paper-raised p-0 text-fg shadow-md backdrop:bg-ink/45', wide ? 'max-w-2xl' : 'max-w-md')}
     >
       {open && (
         <div className="flex max-h-[85vh] flex-col">
