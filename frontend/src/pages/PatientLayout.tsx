@@ -1,19 +1,28 @@
+import { useEffect, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, NavLink, Outlet, useOutletContext, useParams } from 'react-router-dom';
 import { api, qk } from '../api/endpoints';
 import type { Patient } from '../api/types';
 import { SignalStatusBadge } from '../components/SignalStatus';
 import { DemoBadge, ErrorState, LoadingState, TierBadge } from '../components/ui';
+import { LiveFeed } from '../live/liveFeed';
 import { ageFromDob, cx } from '../lib/format';
 import { canUseCopilot, useAuth } from '../state/auth';
 
-export interface PatientCtx { patient: Patient }
+/** Feed is owned here so History / Insights / Reports do not tear down the live socket. */
+export interface PatientCtx { patient: Patient; feed: LiveFeed }
 export const usePatient = () => useOutletContext<PatientCtx>();
 
 export function PatientLayout() {
   const { id = '' } = useParams();
   const role = useAuth((s) => s.user?.role);
   const q = useQuery({ queryKey: qk.patient(id), queryFn: () => api.patient(id), refetchInterval: 10_000 });
+
+  const feed = useMemo(() => new LiveFeed(id), [id]);
+  useEffect(() => {
+    feed.start();
+    return () => feed.stop();
+  }, [feed]);
 
   if (q.isPending) return <LoadingState label="Loading patient…" />;
   if (q.isError) return <ErrorState error={q.error} onRetry={() => void q.refetch()} title="Could not load this patient" />;
@@ -54,7 +63,8 @@ export function PatientLayout() {
           </NavLink>
         ))}
       </nav>
-      <Outlet context={{ patient: p } satisfies PatientCtx} />
+      {/* key remounts child routes when the patient changes so Live pause / insights cannot leak */}
+      <Outlet key={id} context={{ patient: p, feed } satisfies PatientCtx} />
     </div>
   );
 }

@@ -32,6 +32,8 @@ export interface LiveState {
   toastQueue: string[];
   /** Count of messages with an unrecognised `type` (tolerated and ignored). */
   unknownMessages: number;
+  /** Bumped when sample/beat buffers reset without a new session_id (in-place stream restart). */
+  bufferEpoch: number;
 }
 
 export const initialLiveState: LiveState = {
@@ -48,6 +50,7 @@ export const initialLiveState: LiveState = {
   alerts: [],
   toastQueue: [],
   unknownMessages: 0,
+  bufferEpoch: 0,
 };
 
 export const MAX_WINDOWS = 60;
@@ -57,7 +60,8 @@ export type LiveEvent =
   | { kind: 'conn'; conn: ConnState; attempt?: number; retryAt?: number | null; denied?: string | null }
   | { kind: 'sample-time'; iso: string }
   | { kind: 'toast-shown'; id: string }
-  | { kind: 'alert-updated'; alert: Alert };
+  | { kind: 'alert-updated'; alert: Alert }
+  | { kind: 'buffers-reset' };
 
 const TIER_ORDER = { red: 0, orange: 1, amber: 2, green: 3 } as const;
 
@@ -95,6 +99,8 @@ export function reduceLive(state: LiveState, ev: LiveEvent): LiveState {
       return { ...state, toastQueue: state.toastQueue.filter((id) => id !== ev.id) };
     case 'alert-updated':
       return upsertAlert(state, ev.alert, false);
+    case 'buffers-reset':
+      return { ...state, bufferEpoch: state.bufferEpoch + 1 };
     case 'msg':
       return reduceMsg(state, ev.msg);
   }
@@ -138,9 +144,15 @@ function reduceMsg(state: LiveState, msg: LiveMsg | { type: string }): LiveState
     }
     case 'status': {
       const m = msg as StatusMsg;
+      const stream = m.stream === 'connected' || m.stream === 'disconnected' ? m.stream : state.stream;
+      // Keep demo Stop/Restart in sync: a disconnected status means nothing is streaming.
+      const session = m.stream === 'disconnected' && state.session?.active
+        ? { ...state.session, active: false }
+        : state.session;
       return {
         ...state,
-        stream: m.stream === 'connected' || m.stream === 'disconnected' ? m.stream : state.stream,
+        stream,
+        session,
         lastSampleTime: m.last_sample_time ?? state.lastSampleTime,
       };
     }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { visibleRange } from '../../live/beatMatch';
 import type { EcgSource } from '../../live/liveFeed';
 import { fmtClock } from '../../live/scale';
@@ -126,20 +126,42 @@ export function BeatRibbon({ source, getHead, spanS = 60, viewRef, onSeek }: Pro
 
   const seekAt = (clientX: number) => {
     const el = canvasRef.current;
-    if (!el || !onSeek) return;
+    if (!el || !onSeek || width <= 0) return;
     const x = clientX - el.getBoundingClientRect().left;
     onSeek(headRef.current - spanS + (x / width) * spanS);
+  };
+
+  const onKeyDown = (e: KeyboardEvent<HTMLCanvasElement>) => {
+    if (!onSeek) return;
+    const step = e.shiftKey ? spanS / 4 : spanS / 10;
+    if (e.key === 'ArrowLeft') {
+      onSeek(headRef.current - spanS / 2 - step);
+      e.preventDefault();
+    } else if (e.key === 'ArrowRight') {
+      onSeek(headRef.current - spanS / 2 + step);
+      e.preventDefault();
+    } else if (e.key === 'Home') {
+      onSeek(headRef.current - spanS);
+      e.preventDefault();
+    } else if (e.key === 'End') {
+      onSeek(headRef.current);
+      e.preventDefault();
+    }
   };
 
   return (
     <div ref={wrapRef} className="w-full">
       <canvas
         ref={canvasRef}
-        role="img"
-        aria-label={`Beat ribbon: the last ${spanS} seconds, one block per beat. Block colour, pattern and height encode the beat class.`}
+        role={onSeek ? 'slider' : 'img'}
+        tabIndex={onSeek ? 0 : undefined}
+        aria-label={`Beat ribbon: the last ${spanS} seconds, one block per beat. Block colour, pattern and height encode the beat class.${onSeek ? ' Use arrow keys to move the ECG view.' : ''}`}
+        aria-valuemin={0}
+        aria-valuemax={spanS}
         style={{ width: '100%', height: H, display: 'block', cursor: onSeek ? 'pointer' : 'default' }}
         onClick={(e) => seekAt(e.clientX)}
-        title={onSeek ? 'Click to move the ECG view to this moment' : undefined}
+        onKeyDown={onKeyDown}
+        title={onSeek ? 'Click or use arrow keys to move the ECG view to this moment' : undefined}
       />
     </div>
   );

@@ -16,7 +16,7 @@ from sqlalchemy import text, update
 
 import cardiosense.models  # noqa: F401 - register tables on Base.metadata
 from cardiosense import __version__
-from cardiosense.api import admin, alerts, auth, copilot, demo, devices, meta, patients, reports, sessions, ws
+from cardiosense.api import admin, alerts, assistant, auth, copilot, demo, devices, meta, patients, reports, sessions, ws
 from cardiosense.config import DISCLAIMER, get_settings
 from cardiosense.db import Base, dispose_engine, get_engine, session_factory, utcnow
 from cardiosense.models import MonitoringSession, Patient
@@ -109,7 +109,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
         expose_headers=["Content-Disposition"],
     )
-    for module in (auth, patients, devices, sessions, alerts, copilot, reports, demo, admin, meta, ws):
+    for module in (auth, patients, devices, sessions, alerts, copilot, assistant, reports, demo, admin, meta, ws):
         app.include_router(module.router, prefix="/v1")
     return app
 

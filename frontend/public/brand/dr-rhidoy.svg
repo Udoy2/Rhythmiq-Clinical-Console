@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Dr. Rhidoy">
+  <defs>
+    <radialGradient id="disc" cx="38%" cy="32%" r="72%">
+      <stop offset="0%" stop-color="#0F5C6A"/>
+      <stop offset="55%" stop-color="#0B3150"/>
+      <stop offset="100%" stop-color="#071A2E"/>
+    </radialGradient>
+    <linearGradient id="coat" x1="24" y1="58" x2="72" y2="96" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#12C97A"/>
+      <stop offset="1" stop-color="#0B5260"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="48" cy="48" r="48" fill="url(#disc)"/>
+  <circle cx="48" cy="48" r="45.5" fill="none" stroke="#22D889" stroke-width="1.25" opacity="0.28"/>
+
+  <!-- coat / shoulders — no face features -->
+  <path d="M16 96c5-24 15-36 32-36s27 12 32 36" fill="url(#coat)"/>
+  <path d="M40 62c2.8 7 5.8 10 8 10s5.2-3 8-10" fill="#D9F6EA" opacity="0.85"/>
+
+  <!-- head silhouette -->
+  <circle cx="48" cy="38" r="15.5" fill="#CDB29A"/>
+  <path d="M32.8 39c.6-11 7.2-17.5 15.2-17.5S63.4 28 64 39c-2.8-7.2-8.4-10.4-16-10.4S35.6 31.8 32.8 39z" fill="#0A1C30"/>
+
+  <!-- ECG accent across chest -->
+  <path d="M28 74h8l3-8 4 14 3-6h10" fill="none" stroke="#22D3EE" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+</svg>

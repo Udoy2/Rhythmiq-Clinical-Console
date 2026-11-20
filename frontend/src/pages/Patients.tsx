@@ -42,7 +42,7 @@ export function PatientsPage() {
         right={
           <>
             <label className="sr-only" htmlFor="patient-search">Search patients by name or MRN</label>
-            <input id="patient-search" type="search" className="input w-64" placeholder="Search name or MRN" value={search} onChange={(e) => setSearch(e.target.value)} />
+            <input id="patient-search" type="search" className="input w-full min-w-0 max-w-xs sm:w-64" placeholder="Search name or MRN" value={search} onChange={(e) => setSearch(e.target.value)} />
             {canManagePatients(role) && <Button variant="primary" onClick={() => setCreating(true)}>New patient</Button>}
           </>
         }

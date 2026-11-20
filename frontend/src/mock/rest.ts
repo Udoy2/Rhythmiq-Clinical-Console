@@ -222,6 +222,24 @@ const routes: [string, RegExp, Handler][] = [
   ['POST', /^\/alerts\/([^/]+)\/escalate$/, ({ user, m, body }) => alertAction(user, m[1], 'escalated', 'escalate', body.note)],
   ['POST', /^\/alerts\/([^/]+)\/close$/, ({ user, m, body }) => alertAction(user, m[1], 'closed', 'close', body.note)],
 
+  ['GET', /^\/assistant\/suggestions$/, ({ q }) => {
+    const page = (q.get('page') ?? '').toLowerCase();
+    if (page.includes('/live')) {
+      return [
+        { id: 'ecg-strip', label: 'What is the ECG strip?' },
+        { id: 'monitor-sections', label: 'What do the live console panels mean?' },
+        { id: 'beat-labels', label: 'What do the beat labels mean?' },
+        { id: 'cannot-do', label: "What can't Dr. Rhidoy do?" },
+      ];
+    }
+    return [
+      { id: 'start-monitor', label: 'How do I start live monitoring?' },
+      { id: 'beat-labels', label: 'What do the beat labels mean?' },
+      { id: 'alerts', label: 'How do alerts work?' },
+      { id: 'cannot-do', label: "What can't Dr. Rhidoy do?" },
+    ];
+  }],
+
   ['POST', /^\/copilot\/query$/, async ({ user, body }) => {
     need(user, 'clinician', 'org_admin');
     getPatient(user, String(body.patient_id));
@@ -327,6 +345,31 @@ export async function mockFetch(input: string, init: RequestInit = {}): Promise<
     const headers = new Headers(init.headers);
     const user = userFromAuth(headers.get('Authorization'));
     if (!user) return json(401, { detail: 'Not authenticated.' });
+
+    // Dr. Rhidoy SSE chat (mock streams a short FAQ-style reply)
+    if (method === 'POST' && path === '/assistant/chat') {
+      const msg = String(body.message ?? '').trim();
+      const reply =
+        msg.toLowerCase().includes('beat')
+          ? 'N = normal, S = supraventricular ectopic, V = ventricular ectopic, F = fusion, Unknown = low confidence. Decision support only — not a diagnosis.'
+          : 'I can explain Patients, Live console, beat labels, and alerts. I do not diagnose. Try a suggested question for a quicker answer.';
+      const chunks = [reply.slice(0, 48), reply.slice(48)].filter(Boolean);
+      const encoder = new TextEncoder();
+      const stream = new ReadableStream({
+        async start(controller) {
+          for (const c of chunks) {
+            await new Promise((r) => setTimeout(r, 80));
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'token', text: c })}\n\n`));
+          }
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'done', source: 'mock' })}\n\n`));
+          controller.close();
+        },
+      });
+      return new Response(stream, {
+        status: 200,
+        headers: { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache' },
+      });
+    }
 
     // binary endpoints
     let m = /^\/reports\/([^/]+)\.pdf$/.exec(path);

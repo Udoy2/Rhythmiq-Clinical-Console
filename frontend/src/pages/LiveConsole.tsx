@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useStore } from 'zustand';
 import { api, qk } from '../api/endpoints';
@@ -13,21 +13,13 @@ import { LiveBanners } from '../components/live/LiveBanners';
 import { RhythmCard, VitalsStrip } from '../components/live/RhythmCard';
 import { Badge, BeatLegend, Button, Card } from '../components/ui';
 import { agreementStats } from '../live/beatMatch';
-import { LiveFeed } from '../live/liveFeed';
+import type { LiveFeed } from '../live/liveFeed';
 import { alertsSuppressed } from '../live/liveReducer';
 import { computeScale } from '../live/scale';
+import { clearViewPause, readViewPause, writeViewPause } from '../live/viewPause';
 import { canActOnAlerts, canRunDemo, canUseCopilot, useAuth } from '../state/auth';
 import { useToasts } from '../state/toasts';
 import { usePatient } from './PatientLayout';
-
-function useLiveFeed(patientId: string): LiveFeed {
-  const feed = useMemo(() => new LiveFeed(patientId), [patientId]);
-  useEffect(() => {
-    feed.start();
-    return () => feed.stop();
-  }, [feed]);
-  return feed;
-}
 
 /** "DEMO / REPLAY — record 208 (MIT-BIH)" */
 export function replayBadgeText(s: { record?: string | null; dataset?: string | null }): string {
@@ -36,48 +28,106 @@ export function replayBadgeText(s: { record?: string | null; dataset?: string | 
 }
 
 export function LiveConsolePage() {
-  const { patient } = usePatient();
+  const { patient, feed } = usePatient();
   const role = useAuth((s) => s.user?.role);
-  const feed = useLiveFeed(patient.id);
   const s = useStore(feed.store);
   const pushToast = useToasts((t) => t.push);
 
   // ── view state: live, or paused at an absolute stream time ──
+  // Pause/head are remembered per patient; feed lives on PatientLayout so the ring survives tab switches.
   const [settings, setSettings] = useState<EcgViewSettings>({ speedMmS: 25, gainMmMv: 10, showTruth: true });
-  const view = useRef({ paused: false, head: 0 });
-  const [paused, setPaused] = useState(false);
+  const saved = readViewPause(patient.id);
+  const view = useRef({ paused: !!saved?.paused, head: saved && saved.paused ? saved.head : 0 });
+  const [paused, setPaused] = useState(() => !!saved?.paused);
   const viewRange = useRef<{ from: number; to: number } | null>(null);
   const windowS = useRef(6);
   windowS.current = computeScale(900, settings.speedMmS, settings.gainMmMv).windowS;
+  const knownSession = useRef<string | null | undefined>(undefined);
 
-  const getLiveHead = useCallback((now: number) => feed.clock.now(now), [feed]);
+  const persistView = useCallback(() => {
+    if (view.current.paused) writeViewPause(patient.id, { paused: true, head: view.current.head });
+    else writeViewPause(patient.id, { paused: false });
+  }, [patient.id]);
+
   const getHead = useCallback((now: number) => (view.current.paused ? view.current.head : feed.clock.now(now)), [feed]);
   const clampHead = useCallback((t: number) => {
+    if (feed.ring.isEmpty) return t; // do not start PlayoutClock before samples arrive
     const live = feed.clock.now(performance.now());
     const min = Math.min(live, feed.ring.startTime + Math.min(windowS.current, 2));
     return Math.max(min, Math.min(live, t));
   }, [feed]);
   const pause = useCallback(() => {
     if (view.current.paused) return;
+    if (!feed.store.getState().session?.active || feed.ring.isEmpty) return;
     view.current = { paused: true, head: feed.clock.now(performance.now()) };
     setPaused(true);
-  }, [feed]);
-  const resume = useCallback(() => { view.current.paused = false; setPaused(false); }, []);
+    writeViewPause(patient.id, { paused: true, head: view.current.head });
+  }, [feed, patient.id]);
+  const resume = useCallback(() => {
+    view.current.paused = false;
+    setPaused(false);
+    writeViewPause(patient.id, { paused: false });
+  }, [patient.id]);
   const onPan = useCallback((deltaS: number) => {
+    // Match toolbar ▶: no forward pan (and no pause) while live.
+    if (deltaS < 0 && !view.current.paused) return;
     pause();
+    if (!view.current.paused) return;
     view.current.head = clampHead(view.current.head - deltaS);
-  }, [pause, clampHead]);
+    persistView();
+  }, [pause, clampHead, persistView]);
   const onSeek = useCallback((t: number) => {
     pause();
+    if (!view.current.paused) return;
     view.current.head = clampHead(t + windowS.current / 2);
-  }, [pause, clampHead]);
+    persistView();
+  }, [pause, clampHead, persistView]);
   const togglePause = useCallback(() => (view.current.paused ? resume() : pause()), [pause, resume]);
 
-  // a new session starts from live
-  const sessionId = s.session?.session_id;
-  useEffect(() => { resume(); }, [sessionId, resume]);
+  // Re-clamp a restored pause head if the ring pruned old samples (still the same feed across tabs).
+  useEffect(() => {
+    if (!view.current.paused || feed.ring.isEmpty) return;
+    const next = clampHead(view.current.head);
+    if (next !== view.current.head) {
+      view.current.head = next;
+      persistView();
+    }
+  }, [s.session?.session_id, s.conn, clampHead, persistView, feed]);
 
-  // ── alerts: REST backlog merged with what arrives on the socket ──
+  // Drop pause when the session ends — do not show Resume with "No active stream".
+  useEffect(() => {
+    if (s.session && s.session.active === false && paused) resume();
+  }, [s.session, paused, resume]);
+
+  // In-place stream restart (buffers cleared, same session_id): leave the stuck paused head.
+  const bufferEpoch = s.bufferEpoch;
+  const seenEpoch = useRef(bufferEpoch);
+  useEffect(() => {
+    if (bufferEpoch === seenEpoch.current) return;
+    seenEpoch.current = bufferEpoch;
+    if (!view.current.paused) return;
+    clearViewPause(patient.id);
+    resume();
+  }, [bufferEpoch, resume, patient.id]);
+
+  // Auto-resume only when one active session is replaced by another (e.g. Restart replay).
+  // Do NOT treat remount connect (null → sessionId) as a new session — that cleared pause before.
+  const sessionId = s.session?.session_id;
+  useEffect(() => {
+    const next = sessionId ?? null;
+    if (knownSession.current === undefined) {
+      knownSession.current = next;
+      return;
+    }
+    const prev = knownSession.current;
+    if (next === prev) return;
+    knownSession.current = next;
+    if (prev && next && prev !== next) {
+      clearViewPause(patient.id);
+      resume();
+    }
+  }, [sessionId, resume, patient.id]);
+
   const backlog = useQuery({ queryKey: qk.alerts({ patient_id: patient.id, evidence: false }), queryFn: () => api.alerts({ patient_id: patient.id, evidence: false }) });
   useEffect(() => { backlog.data?.forEach((a) => feed.upsertAlert(a)); }, [backlog.data, feed]);
   useEffect(() => {
@@ -142,27 +192,34 @@ export function LiveConsolePage() {
                 <span className="label">Beat ribbon — last 60 s, one block per beat</span>
                 {isReplay && settings.showTruth && <Agreement feed={feed} />}
               </div>
-              <BeatRibbon source={feed} getHead={getLiveHead} viewRef={viewRange} onSeek={onSeek} />
+              <BeatRibbon source={feed} getHead={getHead} viewRef={viewRange} onSeek={onSeek} />
               <BeatLegend className="mt-2" />
             </div>
             {!session?.active && s.conn === 'open' && (
               <p className="mt-3 rounded border border-dashed border-line px-3 py-2 text-sm text-fg-muted">
-                No active stream for this patient. {canRunDemo(role) ? 'Start a demo replay below, or connect the paired device.' : 'The waveform appears when the paired device starts streaming.'}
+                No active stream for this patient. {canRunDemo(role) ? 'Start a demo replay in the side panel, or connect the paired device.' : 'The waveform appears when the paired device starts streaming.'}
               </p>
             )}
           </Card>
 
           <VitalsStrip window={s.window} />
-          {canRunDemo(role) && <DemoControls patientId={patient.id} isDemoPatient={patient.is_demo} session={session} />}
+          {canUseCopilot(role) && <InsightPanel patientId={patient.id} />}
         </div>
 
         <div className="grid min-w-0 grid-cols-1 content-start gap-3 md:grid-cols-2 xl:grid-cols-1">
+          {canRunDemo(role) && (
+            <DemoControls
+              patientId={patient.id}
+              isDemoPatient={patient.is_demo}
+              session={session}
+              stream={s.stream}
+            />
+          )}
           <RhythmCard window={s.window} session={session} suppressed={suppressed} />
           <Card title="Risk" right={<span className="text-2xs text-fg-faint">from the rules engine, every 10 s</span>}>
             <RiskGauge risk={risk} />
           </Card>
           <AlertsPanel alerts={patientAlerts} canAct={canActOnAlerts(role)} onUpdated={(a) => feed.upsertAlert(a)} loading={backlog.isPending} error={backlog.error} />
-          {canUseCopilot(role) && <InsightPanel patientId={patient.id} />}
         </div>
       </div>
     </div>
@@ -181,12 +238,12 @@ function BehindLive({ feed, view, paused }: { feed: LiveFeed; view: { current: {
   const [behind, setBehind] = useState(0);
   useEffect(() => {
     if (!paused) return;
-    const tick = () => setBehind(Math.max(0, feed.clock.headS - view.current.head));
+    const tick = () => setBehind(Math.max(0, feed.clock.now(performance.now()) - view.current.head));
     tick();
     const t = setInterval(tick, 250);
     return () => clearInterval(t);
   }, [paused, feed, view]);
-  if (!paused) return <span className="text-xs text-fg-faint">Drag the trace or use ← → to scroll back</span>;
+  if (!paused) return <span className="text-xs text-fg-faint">Drag the trace or use ← to scroll back</span>;
   return <span className="num text-xs font-medium text-amber-text" role="status">Paused — {behind.toFixed(1)} s behind live</span>;
 }
 

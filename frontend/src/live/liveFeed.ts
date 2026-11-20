@@ -37,14 +37,19 @@ export class LiveFeed implements EcgSource {
   private sessionId: string | null = null;
   private frameLeadOff = false;
   private beatsSincePrune = 0;
-  /** performance.now() of the last socket open; alerts in the connect backlog are not "new". */
+  /** performance.now() of the last socket open (legacy timing window). */
   private openedAt = -Infinity;
+  /** Wall-clock ms at last socket open — used to tell connect backlog from live alerts. */
+  private openedAtWall = 0;
 
   constructor(readonly patientId: string) {
     this.socket = new LiveSocket(patientId, {
       onMessage: (m) => this.handle(m),
       onConn: (conn, info) => {
-        if (conn === 'open') this.openedAt = nowMs();
+        if (conn === 'open') {
+          this.openedAt = nowMs();
+          this.openedAtWall = Date.now();
+        }
         if (conn !== 'open' && this.lastSignalAt !== null) {
           this.dispatch({ kind: 'sample-time', iso: new Date(this.lastSignalAt).toISOString() });
         }
@@ -72,9 +77,9 @@ export class LiveFeed implements EcgSource {
         this.onSession(msg as SessionMsg);
         break;
       case 'alert': {
-        // On connect the server replays the patient's unresolved alerts; those must not raise toasts.
+        // On connect the server replays unresolved alerts; silence those, not alerts created after open.
         const a = (msg as { alert?: Alert }).alert;
-        if (a && a.id && nowMs() - this.openedAt < BACKLOG_MS) {
+        if (a && a.id && this.isConnectBacklog(a)) {
           this.dispatch({ kind: 'alert-updated', alert: a });
           return;
         }
@@ -82,6 +87,16 @@ export class LiveFeed implements EcgSource {
       }
     }
     this.dispatch({ kind: 'msg', msg });
+  }
+
+  /**
+   * Connect backlog = alert already existed at (or just before) socket open.
+   * Fall back to BACKLOG_MS only when created_at is missing.
+   */
+  private isConnectBacklog(a: Alert): boolean {
+    const created = a.created_at ? Date.parse(a.created_at) : NaN;
+    if (Number.isFinite(created)) return created <= this.openedAtWall + 250;
+    return nowMs() - this.openedAt < BACKLOG_MS;
   }
 
   private onSession(m: SessionMsg): void {
@@ -106,6 +121,7 @@ export class LiveFeed implements EcgSource {
       this.ring.reset(fs);
       this.beats.clear();
       this.clock.reset();
+      this.dispatch({ kind: 'buffers-reset' });
     }
     this.ring.write(t0, m.mv);
     this.clock.onData(this.ring.endTime, nowMs());

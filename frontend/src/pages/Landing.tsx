@@ -1,25 +1,30 @@
 import { useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
+import { motion, useReducedMotion } from 'framer-motion';
 import { BrandLogo } from '../components/BrandLogo';
+import { OrbitalSphere } from '../components/landing/OrbitalSphere';
 import { useAuth } from '../state/auth';
 import { DISCLAIMER } from '../api/types';
 import { cx } from '../lib/format';
 
 const DEMO_PASSWORD = 'CardioSense!23';
 
+const HERO_ECG =
+  'M0 180 H180 L210 180 L240 60 L270 260 L300 180 H420 L450 180 L480 100 L510 240 L540 180 H720 L750 180 L780 40 L810 280 L840 180 H960 L990 180 L1020 120 L1050 220 L1080 180 H1200';
+const DEMO_ECG =
+  'M0 62 H90 L110 62 L130 28 L150 96 L170 62 H260 L280 62 L300 40 L320 84 L340 62 H430 L450 62 L470 18 L490 104 L510 62 H600 L620 62 L640 48 L660 76 L680 62 H720';
+
+const DEMO_MARKERS = [
+  { cx: 150, cy: 28, fill: '#FF5F57' },
+  { cx: 300, cy: 40, fill: '#00B86B' },
+  { cx: 470, cy: 18, fill: '#d97706' },
+] as const;
+
 const NAV = [
   { href: '#services', label: 'Capabilities' },
   { href: '#advantage', label: 'Advantage' },
   { href: '#process', label: 'Process' },
   { href: '#demo', label: 'Demo' },
-  { href: '#care', label: 'Approach' },
-];
-
-const STATS = [
-  { value: '24/7', label: 'Demo console ready' },
-  { value: '4', label: 'Beat classes + Unknown' },
-  { value: '3', label: 'MIT-BIH labelled replays' },
-  { value: '100%', label: 'Evidence with every tier' },
 ];
 
 const SERVICES = [
@@ -95,8 +100,31 @@ const DEMO_PATIENTS = [
 /** Public marketing entry — Pathfinder-like composition, Rhythmiq brand. */
 export function LandingPage() {
   const token = useAuth((s) => s.accessToken);
+  const reduceMotion = useReducedMotion();
   const [scrolled, setScrolled] = useState(false);
   const [showTop, setShowTop] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const sweep = reduceMotion
+    ? undefined
+    : { x: [0, -1200] as number[], transition: { duration: 18, ease: 'linear' as const, repeat: Infinity } };
+  const demoSweep = reduceMotion
+    ? undefined
+    : { x: [0, -720] as number[], transition: { duration: 14, ease: 'linear' as const, repeat: Infinity } };
+  const livePulse = reduceMotion
+    ? undefined
+    : {
+        scale: [1, 1.45, 1],
+        opacity: [1, 0.45, 1],
+        transition: { duration: 1.7, ease: 'easeInOut' as const, repeat: Infinity },
+      };
+  const markerPulse = reduceMotion
+    ? undefined
+    : {
+        r: [5, 6.5, 5],
+        opacity: [0.95, 0.5, 0.95],
+        transition: { duration: 1.4, ease: 'easeInOut' as const, repeat: Infinity },
+      };
 
   useEffect(() => {
     const onScroll = () => {
@@ -108,6 +136,21 @@ export function LandingPage() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenuOpen(false); };
+    const onResize = () => { if (window.innerWidth >= 900) setMenuOpen(false); };
+    document.addEventListener('keydown', onKey);
+    window.addEventListener('resize', onResize);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      window.removeEventListener('resize', onResize);
+      document.body.style.overflow = prev;
+    };
+  }, [menuOpen]);
+
   if (token) return <Navigate to="/patients" replace />;
 
   return (
@@ -116,17 +159,44 @@ export function LandingPage() {
         Skip to content
       </a>
 
-      <header className={cx('landing-nav', scrolled && 'is-scrolled')}>
+      <header className={cx('landing-nav', scrolled && 'is-scrolled', menuOpen && 'is-open')}>
         <div className="landing-nav-inner">
-          <a href="#main" className="landing-nav-brand">
-            <BrandLogo size="md" withWordmark onDark />
+          <a href="#main" className="landing-nav-brand" onClick={() => setMenuOpen(false)}>
+            <BrandLogo size="sm" withWordmark onDark className="landing-nav-logo-sm" />
+            <BrandLogo size="md" withWordmark onDark className="landing-nav-logo-md" />
           </a>
           <nav className="landing-nav-links" aria-label="Page">
             {NAV.map((item) => (
               <a key={item.href} href={item.href}>{item.label}</a>
             ))}
           </nav>
-          <Link to="/login" className="landing-btn-ghost landing-nav-cta">
+          <div className="landing-nav-actions">
+            <Link to="/login" className="landing-btn-ghost landing-nav-cta">
+              Sign in
+            </Link>
+            <button
+              type="button"
+              className="landing-nav-toggle"
+              aria-expanded={menuOpen}
+              aria-controls="landing-mobile-nav"
+              aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+              onClick={() => setMenuOpen((o) => !o)}
+            >
+              <span className={cx('landing-nav-toggle-bar', menuOpen && 'is-open')} aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+        <div
+          id="landing-mobile-nav"
+          className={cx('landing-nav-drawer', menuOpen && 'is-open')}
+          hidden={!menuOpen}
+        >
+          <nav aria-label="Page sections">
+            {NAV.map((item) => (
+              <a key={item.href} href={item.href} onClick={() => setMenuOpen(false)}>{item.label}</a>
+            ))}
+          </nav>
+          <Link to="/login" className="landing-btn-ghost landing-nav-drawer-cta" onClick={() => setMenuOpen(false)}>
             Sign in
           </Link>
         </div>
@@ -136,15 +206,6 @@ export function LandingPage() {
         <section className="landing-hero" aria-labelledby="landing-brand">
           <div className="landing-hero-atmosphere" aria-hidden="true">
             <svg className="landing-ecg" viewBox="0 0 1200 320" preserveAspectRatio="none">
-              <path
-                className="landing-ecg-path"
-                d="M0 180 H180 L210 180 L240 60 L270 260 L300 180 H420 L450 180 L480 100 L510 240 L540 180 H720 L750 180 L780 40 L810 280 L840 180 H960 L990 180 L1020 120 L1050 220 L1080 180 H1200"
-                fill="none"
-                stroke="url(#landingEcgGrad)"
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
               <defs>
                 <linearGradient id="landingEcgGrad" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
                   <stop offset="0%" stopColor="#00B86B" stopOpacity="0.15" />
@@ -152,39 +213,57 @@ export function LandingPage() {
                   <stop offset="100%" stopColor="#22D3EE" stopOpacity="0.35" />
                 </linearGradient>
               </defs>
+              <motion.g animate={sweep}>
+                <path
+                  className="landing-ecg-path"
+                  d={HERO_ECG}
+                  fill="none"
+                  stroke="url(#landingEcgGrad)"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  className="landing-ecg-path"
+                  d={HERO_ECG}
+                  transform="translate(1200 0)"
+                  fill="none"
+                  stroke="url(#landingEcgGrad)"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </motion.g>
             </svg>
           </div>
 
-          <div className="landing-hero-copy landing-hero-copy-center">
-            <p id="landing-brand" className="landing-brand-word">Rhythmiq</p>
-            <h1 className="landing-headline">
-              Your gateway to clearer<br />
-              <span className="text-[var(--rq-green-bright)]">rhythm decisions.</span>
-            </h1>
-            <p className="landing-lede">
-              Rhythmiq turns a low-cost ECG stream into a clinician console — with{' '}
-              <strong>every beat labelled</strong>, <strong>risk tied to evidence</strong>, and{' '}
-              <strong>AI that cites the record</strong>. Research and demonstration, not a medical device.
-            </p>
-            <div className="landing-actions landing-actions-center">
-              <Link to="/login" className="btn-primary">
-                Enter the console
-              </Link>
-              <a href="#services" className="landing-btn-ghost">
-                Explore capabilities
-              </a>
-            </div>
-          </div>
-        </section>
+          <OrbitalSphere />
 
-        <section className="landing-stats" aria-label="Highlights">
-          <div className="landing-section-inner landing-stats-grid">
-            {STATS.map((s) => (
-              <div key={s.label} className="landing-stat">
-                <div className="landing-stat-value">{s.value}</div>
-                <div className="landing-stat-label">{s.label}</div>
+          <div className="landing-hero-layout">
+            <div className="landing-hero-copy">
+              <p className="landing-live" aria-hidden="true">
+                <motion.span className="landing-live-dot" animate={livePulse} />
+                Live monitor
+              </p>
+              <p id="landing-brand" className="landing-brand-word">Rhythmiq</p>
+              <h1 className="landing-headline">
+                Your gateway to clearer<br />
+                <span className="text-[var(--rq-green-bright)]">rhythm decisions.</span>
+              </h1>
+              <p className="landing-lede">
+                Rhythmiq turns a low-cost ECG stream into a clinician console — with{' '}
+                <strong>every beat labelled</strong>, <strong>risk tied to evidence</strong>, and{' '}
+                <strong>AI that cites the record</strong>. Research and demonstration, not a medical device.
+              </p>
+              <div className="landing-actions">
+                <Link to="/login" className="btn-primary">
+                  Enter the console
+                </Link>
+                <a href="#services" className="landing-btn-ghost">
+                  Explore capabilities
+                </a>
               </div>
-            ))}
+            </div>
           </div>
         </section>
 
@@ -256,6 +335,10 @@ export function LandingPage() {
             </div>
 
             <div className="landing-demo-visual" aria-hidden="true">
+              <div className="landing-demo-live">
+                <motion.span className="landing-live-dot landing-live-dot-on-light" animate={livePulse} />
+                Streaming
+              </div>
               <svg viewBox="0 0 720 120" className="landing-demo-ecg-vector">
                 <defs>
                   <linearGradient id="demoEcgGrad" x1="0" y1="0" x2="720" y2="0" gradientUnits="userSpaceOnUse">
@@ -264,17 +347,31 @@ export function LandingPage() {
                     <stop offset="100%" stopColor="#22D3EE" stopOpacity="0.35" />
                   </linearGradient>
                 </defs>
-                <path
-                  d="M0 62 H90 L110 62 L130 28 L150 96 L170 62 H260 L280 62 L300 40 L320 84 L340 62 H430 L450 62 L470 18 L490 104 L510 62 H600 L620 62 L640 48 L660 76 L680 62 H720"
-                  fill="none"
-                  stroke="url(#demoEcgGrad)"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-                <circle cx="150" cy="28" r="5" fill="#FF5F57" />
-                <circle cx="470" cy="18" r="5" fill="#d97706" />
-                <circle cx="300" cy="40" r="5" fill="#00B86B" />
+                <motion.g animate={demoSweep}>
+                  <path
+                    d={DEMO_ECG}
+                    fill="none"
+                    stroke="url(#demoEcgGrad)"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  {DEMO_MARKERS.map((m) => (
+                    <motion.circle key={`a-${m.cx}`} cx={m.cx} cy={m.cy} r={5} fill={m.fill} animate={markerPulse} />
+                  ))}
+                  <path
+                    d={DEMO_ECG}
+                    transform="translate(720 0)"
+                    fill="none"
+                    stroke="url(#demoEcgGrad)"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  {DEMO_MARKERS.map((m) => (
+                    <motion.circle key={`b-${m.cx}`} cx={m.cx + 720} cy={m.cy} r={5} fill={m.fill} animate={markerPulse} />
+                  ))}
+                </motion.g>
               </svg>
             </div>
 
@@ -369,22 +466,6 @@ export function LandingPage() {
                   Start at sign in
                 </Link>
               </article>
-            </div>
-          </div>
-        </section>
-
-        <section className="landing-section" id="care" aria-labelledby="care-heading">
-          <div className="landing-section-inner landing-center">
-            <h2 id="care-heading">Technology that keeps care in rhythm</h2>
-            <p className="landing-section-lede landing-section-lede-center">
-              Navy for trust. Medical green for action. Cyan for AI clarity. Built so humans stay in the loop.
-            </p>
-            <div className="landing-limits landing-limits-center">
-              <h3>Honest limits</h3>
-              <p>
-                Rhythmiq is a research and demonstration system. It is not a medical device, not an emergency service,
-                and it does not diagnose or prescribe. Demo patients replay public labelled recordings only.
-              </p>
             </div>
           </div>
         </section>
